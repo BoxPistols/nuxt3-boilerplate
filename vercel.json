@@ -1,3 +1,4 @@
 {
-  "functions": {}
+  "buildCommand": "next build",
+   "devCommand": "next dev"
 }
