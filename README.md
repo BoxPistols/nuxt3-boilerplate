@@ -4,7 +4,7 @@ Deploy your [Nuxt](https://nuxt.com) project to Vercel with zero configuration.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/vercel/tree/main/examples/nuxtjs&template=nuxtjs)
 
-_Live Example: https://nuxtjs-template.vercel.app_
+_Live Example: <https://nuxtjs-template.vercel.app>_
 
 Look at the [Nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
 
@@ -25,7 +25,7 @@ pnpm install --shamefully-hoist
 
 ## Development Server
 
-Start the development server on http://localhost:3000
+Start the development server on <http://localhost:3000>
 
 ```bash
 npm run dev
