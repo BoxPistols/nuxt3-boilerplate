@@ -3,7 +3,13 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   srcDir: 'src',
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/tailwind.css'],
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
   routeRules: {},
   app: {
     head: {

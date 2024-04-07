@@ -11,8 +11,8 @@
     "build-storybook": "storybook build",
     "lint": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore'",
     "lint:fix": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore' --fix",
-    "format": "prettier --write .",
-    "format:fix": "prettier --write ."
+    "format": "prettier --write '**/*.{js,ts,vue,css,scss,json,md}'",
+    "fix": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore' --fix && prettier --write ."
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.25",

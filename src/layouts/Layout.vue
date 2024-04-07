@@ -1,15 +1,17 @@
 <template>
-  <div class="layout">
+  <div
+    class="layout flex flex-col min-h-screen bg-gray-100 text-gray-800 font-sans"
+  >
     <header>
-      <!-- Your header content goes here -->
+      <h1 class="text-3xl text-blue-400 font-bold">Nuxt 3 template</h1>
     </header>
-
     <main>
-      <!-- Your main content goes here -->
+      <slot />
     </main>
-
-    <footer>
-      <!-- Your footer content goes here -->
+    <footer
+      class="text-center text-gray-400 text-sm border-t border-gray-200 mt-4"
+    >
+      <p>&copy; 2021 Nuxt 3 template</p>
     </footer>
   </div>
 </template>
@@ -22,14 +24,11 @@ export default {
 </script>
 
 <style scoped>
-/* Add your custom styles for the layout here */
 .layout {
-  /* Your layout styles */
   padding: auto;
 }
 
 header {
-  /* Your header styles */
   padding: 1rem;
 }
 
@@ -40,6 +39,8 @@ main {
 
 footer {
   padding: 1rem;
-  /* Your footer styles */
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
 </style>
