@@ -1,0 +1,12 @@
+# Ignore artifacts:
+build
+coverage
+.nuxt
+.output
+dist
+
+# Ignore all HTML files:
+*.html
+
+# Ignore files related to API keys
+.env

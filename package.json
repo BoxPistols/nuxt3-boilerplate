@@ -12,7 +12,8 @@
     "lint": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore'",
     "lint:fix": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore' --fix",
     "format": "prettier --write '**/*.{js,ts,vue,css,scss,json,md}'",
-    "fix": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore' --fix && prettier --write ."
+    "fix": "eslint --ext .vue,.ts,.js src/ --ignore-pattern '.gitignore' --fix && prettier --write .",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.25",
@@ -35,9 +36,10 @@
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-vue": "^9.24.0",
+    "husky": "^8.0.0",
     "nuxt": "^3.8.2",
     "postcss": "^8.4.38",
-    "prettier": "3.2.5",
+    "prettier": "^3.2.5",
     "storybook": "^8.0.4",
     "tailwindcss": "^3.4.3",
     "typescript": "*",
