@@ -4,13 +4,16 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   srcDir: 'src',
   css: ['~/assets/css/tailwind.css'],
+
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
   },
+
   routeRules: {},
+
   app: {
     head: {
       title: 'My Awesome App', // サイトのタイトル
@@ -60,4 +63,6 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
   },
+
+  modules: ['@nuxtjs/tailwindcss'],
 })

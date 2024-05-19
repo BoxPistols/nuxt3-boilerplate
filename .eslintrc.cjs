@@ -8,5 +8,6 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/singleline-html-element-content-newline': 'off',
     'vue/no-v-html': 'warn',
+    'vue/max-attributes-per-line': ['off'],
   },
 }

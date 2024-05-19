@@ -26,10 +26,11 @@
         <h1>Acme</h1>
       </div>
       <div>
-        <span v-if="user" class="welcome"
-          >Welcome, <b>{{ user.name }}</b
-          >!</span
-        >
+        <span v-if="user" class="welcome">
+          Welcome,
+          <b>{{ user.name }}</b>
+          !
+        </span>
         <my-button
           size="small"
           @click="$emit('logout')"

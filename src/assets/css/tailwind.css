@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* body {
-  font-family: 'Futura', sans-serif;
-} */
+html,
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+a {
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #38bdf8;
+}

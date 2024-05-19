@@ -1,46 +1,35 @@
 <template>
-  <div
-    class="layout flex flex-col min-h-screen bg-gray-100 text-gray-800 font-sans"
-  >
-    <header>
-      <h1 class="text-3xl text-blue-400 font-bold">Nuxt 3 template</h1>
-    </header>
-    <main>
-      <slot />
-    </main>
-    <footer
-      class="text-center text-gray-400 text-sm border-t border-gray-200 mt-4"
+  <div class="flex flex-col min-h-screen">
+    <header
+      class="fixed top-0 left-0 w-full py-4 bg-opacity-50 bg-techBlue text-center z-50"
     >
-      <p>&copy; 2021 Nuxt 3 template</p>
+      <nav class="container mx-auto flex justify-between items-center">
+        <h1 class="text-3xl font-bold">My Tech Site</h1>
+        <ul class="flex space-x-6">
+          <li>
+            <a href="#features" class="hover:text-blue-400">Features</a>
+          </li>
+          <li>
+            <a href="#about" class="hover:text-blue-400">About</a>
+          </li>
+          <li>
+            <a href="#contact" class="hover:text-blue-400">Contact</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <slot class="flex-grow" />
+    <footer class="py-4 text-center text-sm bg-techBlue">
+      © 2024 My Tech Site. All rights reserved.
     </footer>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Layout',
-  // Add any necessary component options or logic here
-}
-</script>
+<script setup></script>
 
 <style scoped>
-.layout {
-  padding: auto;
-}
-
-header {
-  padding: 1rem;
-}
-
-main {
-  padding: 1rem;
-  /* Your main content styles */
-}
-
+header,
 footer {
-  padding: 1rem;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  backdrop-filter: blur(10px);
 }
 </style>
