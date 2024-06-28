@@ -1,7 +1,12 @@
 module.exports = {
   extends: ['plugin:vue/vue3-recommended'],
   // ignore stories files
-  ignorePatterns: ['**/*.stories.js', 'stories/**/*.vue'],
+  ignorePatterns: [
+    '**/*.stories.js',
+    'stories/**/*.vue',
+    '**/*.md',
+    '**/.github/**',
+  ],
   rules: {
     'no-console': 'off',
     'no-debugger': 'off',
