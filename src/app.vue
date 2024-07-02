@@ -24,6 +24,7 @@
       </div>
     </main>
   </Layout>
+  <NuxtPage />
 </template>
 
 <script setup>
