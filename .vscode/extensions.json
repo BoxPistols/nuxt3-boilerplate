@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "davidanson.vscode-markdownlint",
+    "usernamehw.errorlens",
+    "wayou.vscode-todo-highlight",
+    "gruntfuggly.todo-tree"
+  ]
+  // VS拡張に @recommended を入力すると、おすすめの拡張機能が表示されます。
+}
