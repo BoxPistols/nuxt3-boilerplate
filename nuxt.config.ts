@@ -8,6 +8,7 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
+
   srcDir: 'src',
   css: ['~/assets/css/tailwind.css'],
 
@@ -71,4 +72,5 @@ export default defineNuxtConfig({
   },
 
   modules: ['@nuxtjs/tailwindcss'],
+  compatibilityDate: '2024-08-12',
 })
