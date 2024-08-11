@@ -42,7 +42,6 @@
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "storybook": "^8.1.11",
-    "tailwindcss": "^3.4.3",
     "typescript": "*",
     "vue": "^3.3.8",
     "vue-loader": "^17.4.2",
