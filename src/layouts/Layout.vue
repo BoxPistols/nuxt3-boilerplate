@@ -18,7 +18,7 @@
         </ul>
       </nav>
     </header>
-    <slot class="flex-grow" />
+    <slot class="flex-grow"></slot>
     <footer class="py-4 text-center text-sm bg-techBlue">
       © 2024 My Tech Site. All rights reserved.
     </footer>
