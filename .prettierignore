@@ -10,3 +10,5 @@ dist
 
 # Ignore files related to API keys
 .env
+
+**/*.d.ts

@@ -6,7 +6,7 @@
         background-image: url('https://source.unsplash.com/1600x900/?technology');
       "
     >
-      <div class="absolute inset-0 bg-black opacity-50" />
+      <div class="absolute inset-0 bg-black opacity-50"></div>
       <div class="relative z-10 text-center animate-fade-in">
         <h1 class="text-6xl font-bold tracking-tight leading-tight">
           Welcome to the Future of Tech
