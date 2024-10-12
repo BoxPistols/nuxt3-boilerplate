@@ -12,10 +12,12 @@
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
-    "fix": "yarn lint:fix && yarn format"
+    "fix": "yarn lint:fix && yarn format",
+    "lh": "lhci autorun"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.25",
+    "@lhci/cli": "^0.14.0",
     "@nuxt/devtools": "^1.0.3",
     "@nuxt/typescript-build": "^3.0.2",
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
