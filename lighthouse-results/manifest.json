@@ -1,9 +1,9 @@
 [
   {
-    "url": "/",
+    "url": "http://localhost:3000/",
     "isRepresentativeRun": true,
-    "htmlPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_18_14_01-report.html",
-    "jsonPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_18_14_01-report.json",
+    "htmlPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_18_21_59-report.html",
+    "jsonPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_18_21_59-report.json",
     "summary": {
       "performance": 0.98,
       "accessibility": 1,
