@@ -3,40 +3,48 @@ import path from 'node:path'
 
 const RESULTS_DIR = './lighthouse-results'
 
+// UTCを日本時間（JST）に変換する関数
+function convertToJST(utcString) {
+  const date = new Date(utcString)
+  return date.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
 // HTMLファイルを処理する関数
 function processHtmlFile(filePath) {
   let content = fs.readFileSync(filePath, 'utf8')
 
-  // ファイル名から日時とURLを抽出
-  const filenameMatch = path
-    .basename(filePath)
-    .match(/^(\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2})-(.*)-report\.html$/)
-  if (filenameMatch) {
-    const [, dateTime, url] = filenameMatch
-    const formattedDateTime = dateTime
-      .replace(/_/g, ':')
-      .replace(/(\d{4}):(\d{2}):(\d{2}):/, '$1-$2-$3 ')
-    const decodedUrl = decodeURIComponent(url)
-      .replace(/^https?:\/\//, '')
-      .replace(/\/$/, '')
+  // JSONデータを抽出
+  const jsonMatch = content.match(
+    /window\.__LIGHTHOUSE_JSON__ = (.+?);<\/script>/
+  )
+  if (jsonMatch) {
+    const lighthouseData = JSON.parse(jsonMatch[1])
+    const jstDateTime = convertToJST(lighthouseData.fetchTime)
 
-    // 日時とURL情報を<head>タグ内に挿入
-    const infoScript = `
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const infoDiv = document.createElement('div');
-          infoDiv.style.cssText = 'background-color: #f0f0f0; padding: 10px; text-align: center; font-family: Arial, sans-serif;';
-          infoDiv.innerHTML = '<strong>Report generated:</strong> ${formattedDateTime}<br><strong>URL:</strong> ${decodedUrl}';
-          document.body.insertBefore(infoDiv, document.body.firstChild);
-        });
-      </script>
+    // 新しい情報を含むdivを作成
+    const infoDiv = `
+      <div id="lh-info" style="background-color: #234; color:white; padding: 10px; text-align: center; font-family: Arial, sans-serif;">
+        <strong>Report generated (JST):</strong> ${jstDateTime}
+      </div>
     `
-    content = content.replace('</head>', `${infoScript}</head>`)
+
+    // infoDiv を <body> タグの直後に挿入
+    content = content.replace('<body>', `<body>${infoDiv}`)
 
     // 変更を保存
     fs.writeFileSync(filePath, content)
+    console.log(`Updated ${path.basename(filePath)} with date/time information`)
+  } else {
     console.log(
-      `Updated ${path.basename(filePath)} with date/time and URL information`
+      `Failed to update ${path.basename(filePath)}: JSON data not found`
     )
   }
 }

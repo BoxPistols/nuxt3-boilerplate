@@ -1,0 +1,14 @@
+[
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_17_55_16-report.html",
+    "jsonPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/2024_10_13_17_55_16-report.json",
+    "summary": {
+      "performance": 0.98,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  }
+]
