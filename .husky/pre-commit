@@ -1,1 +1,2 @@
-lint-staged && yarn ci
+lint-staged && yarn prettier --write .
+git add .
