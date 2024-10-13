@@ -22,11 +22,11 @@ function getCurrentJSTTimestamp() {
   const formatter = new Intl.DateTimeFormat('ja-JP', jstOptions)
   const parts = formatter.formatToParts(now)
   const dateParts = {}
-  parts.forEach(({ type, value }) => {
+  for (const { type, value } of parts) {
     if (type !== 'literal') {
       dateParts[type] = value
     }
-  })
+  }
   return `${dateParts.year}_${dateParts.month}_${dateParts.day}_${dateParts.hour}_${dateParts.minute}_${dateParts.second}`
 }
 
