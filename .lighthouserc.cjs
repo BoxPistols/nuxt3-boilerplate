@@ -4,15 +4,17 @@ const path = require('node:path')
 const isWindows = os.platform() === 'win32'
 const isWSL = os.release().toLowerCase().includes('microsoft')
 
+const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
+
 /** @type {import('@lhci/cli').Config} */
 module.exports = {
   ci: {
     collect: {
-      url: ['http://localhost:3000'],
+      url: [`${BASE_URL}/`],
       startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
-      maxWaitForLoad: 120000,
-      numberOfRuns: 3,
+      maxWaitForLoad: 60000,
+      numberOfRuns: 1,
       settings: {
         chromeFlags: [
           '--no-sandbox',
