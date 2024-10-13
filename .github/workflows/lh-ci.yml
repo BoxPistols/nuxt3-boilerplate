@@ -2,11 +2,9 @@ name: Lighthouse CI
 
 on:
   push:
-    branches:
-      - ${{ github.event.repository.default_branch }}
+    branches: [main] # mainブランチへの直接プッシュ時
   pull_request:
-    branches:
-      - ${{ github.event.repository.default_branch }}
+    branches: [main] # mainブランチへのPR時
 
 jobs:
   lhci:
