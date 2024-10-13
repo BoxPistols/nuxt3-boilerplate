@@ -49,3 +49,5 @@ jobs:
         run: |
           echo "Lighthouse Results:"
           cat lighthouse-results/manifest.json | jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"'
+      - name: Process Lighthouse reports
+        run: yarn lh:process
