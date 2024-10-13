@@ -3,27 +3,28 @@ import path from 'node:path'
 
 const RESULTS_DIR = './lighthouse-results'
 
-function convertUTCtoJST(utcString) {
-  const date = new Date(
-    `${utcString
-      .replace(/_/g, ':')
-      .replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3T')}Z`
+function getCurrentJSTTimestamp() {
+  const now = new Date()
+  const jstDate = new Date(
+    now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
   )
-  date.setHours(date.getHours() + 9)
-  return date
-    .toISOString()
-    .replace(/[-:]/g, '_')
-    .replace(/T/, '_')
-    .split('.')[0]
+  const pad = num => num.toString().padStart(2, '0')
+
+  const year = jstDate.getFullYear()
+  const month = pad(jstDate.getMonth() + 1)
+  const day = pad(jstDate.getDate())
+  const hours = pad(jstDate.getHours())
+  const minutes = pad(jstDate.getMinutes())
+  const seconds = pad(jstDate.getSeconds())
+
+  return `${year}_${month}_${day}_${hours}_${minutes}_${seconds}`
 }
 
 function renameFile(file) {
-  const match = file.match(
-    /lighthouse-(\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2})-report\.(.+)$/
-  )
+  const match = file.match(/lighthouse-.*-report\.(.+)$/)
   if (match) {
-    const [, utcTimestamp, extension] = match
-    const jstTimestamp = convertUTCtoJST(utcTimestamp)
+    const [, extension] = match
+    const jstTimestamp = getCurrentJSTTimestamp()
     const newFilename = `lighthouse-${jstTimestamp}-report.${extension}`
     const oldPath = path.join(RESULTS_DIR, file)
     const newPath = path.join(RESULTS_DIR, newFilename)
@@ -39,36 +40,46 @@ function renameFile(file) {
   return null
 }
 
-const files = fs.readdirSync(RESULTS_DIR)
-files.forEach(renameFile)
+function main() {
+  try {
+    const files = fs.readdirSync(RESULTS_DIR)
+    const renamedFiles = files.map(renameFile).filter(Boolean)
 
-// manifest.jsonの更新
-const manifestPath = path.join(RESULTS_DIR, 'manifest.json')
-if (fs.existsSync(manifestPath)) {
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-  let updated = false
-  for (const entry of manifest) {
-    if (entry.htmlPath) {
-      const basename = path.basename(entry.htmlPath)
-      const newBasename = renameFile(basename)
-      if (newBasename && newBasename !== basename) {
-        entry.htmlPath = entry.htmlPath.replace(basename, newBasename)
-        updated = true
+    // manifest.jsonの更新
+    const manifestPath = path.join(RESULTS_DIR, 'manifest.json')
+    if (fs.existsSync(manifestPath)) {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+      let updated = false
+
+      manifest.forEach(entry => {
+        if (entry.htmlPath) {
+          const oldBasename = path.basename(entry.htmlPath)
+          const newBasename = renamedFiles.find(file => file.endsWith('.html'))
+          if (newBasename && newBasename !== oldBasename) {
+            entry.htmlPath = path.join(RESULTS_DIR, newBasename)
+            updated = true
+          }
+        }
+        if (entry.jsonPath) {
+          const oldBasename = path.basename(entry.jsonPath)
+          const newBasename = renamedFiles.find(file => file.endsWith('.json'))
+          if (newBasename && newBasename !== oldBasename) {
+            entry.jsonPath = path.join(RESULTS_DIR, newBasename)
+            updated = true
+          }
+        }
+      })
+
+      if (updated) {
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+        console.log('Updated manifest.json with new filenames')
+      } else {
+        console.log('No changes needed in manifest.json')
       }
     }
-    if (entry.jsonPath) {
-      const basename = path.basename(entry.jsonPath)
-      const newBasename = renameFile(basename)
-      if (newBasename && newBasename !== basename) {
-        entry.jsonPath = entry.jsonPath.replace(basename, newBasename)
-        updated = true
-      }
-    }
-  }
-  if (updated) {
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-    console.log('Updated manifest.json with new filenames')
-  } else {
-    console.log('No changes needed in manifest.json')
+  } catch (error) {
+    console.error('An error occurred:', error.message)
   }
 }
+
+main()
