@@ -13,7 +13,9 @@
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
     "fix": "yarn lint:fix && yarn format",
-    "lh": "lhci autorun"
+    "lh": "lhci autorun",
+    "lh:ci": "lhci autorun",
+    "lh:view": "node -e \"const os=require('os');const path=require('path');const exec=require('child_process').exec;const cmd=os.platform()==='win32'?'start':'open';exec(`${cmd} ${path.join('lighthouse-results', '*.html')}`)\""
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.25",

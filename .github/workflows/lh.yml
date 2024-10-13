@@ -1,17 +1,22 @@
-name: 'LH Score'
+name: Lighthouse CI
 on: [push]
 jobs:
   lhci:
-    name: Lighthouse
+    name: Lighthouse CI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
         with:
-          node-version: 12
-      - name: build
-        run: echo '必要なビルドステップがあればここに記述する'
+          node-version: 18.x
+      - name: npm install, build
+        run: |
+          npm ci
+          npm run build
       - name: run Lighthouse CI
         run: |
-          npm install -g @lhci/cli@0.6.x
+          npm install -g @lhci/cli@0.12.x
           lhci autorun
+    env:
+      LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
