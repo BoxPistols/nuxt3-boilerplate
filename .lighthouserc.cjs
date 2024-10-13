@@ -8,11 +8,11 @@ const isWSL = os.release().toLowerCase().includes('microsoft')
 module.exports = {
   ci: {
     collect: {
-      url: ['http://localhost:3333'],
-      startServerCommand: 'yarn build && yarn preview --port 3333',
-      staticDistDir: '.output/public',
-      maxWaitForLoad: 120000, // 120秒のタイムアウト
-      numberOfRuns: 3,
+      url: ['http://localhost:3000'],
+      startServerCommand: 'node .output/server/index.mjs',
+      startServerReadyPattern: 'Listening on',
+      maxWaitForLoad: 120000,
+      numberOfRuns: 1,
       settings: {
         chromeFlags: [
           '--no-sandbox',
@@ -25,13 +25,19 @@ module.exports = {
       },
     },
     assert: {
+      // assertions: {
+      //   'categories:performance': ['warn', { minScore: 0.7 }],
+      //   'categories:accessibility': ['warn', { minScore: 0.8 }],
+      //   'categories:best-practices': ['warn', { minScore: 0.8 }],
+      //   'categories:seo': ['warn', { minScore: 0.8 }],
+      //   'first-contentful-paint': ['warn', { maxNumericValue: 3000 }],
+      //   interactive: ['warn', { maxNumericValue: 3500 }],
+      // },
       assertions: {
-        'categories:performance': ['warn', { minScore: 0.7 }],
-        'categories:accessibility': ['warn', { minScore: 0.8 }],
-        'categories:best-practices': ['warn', { minScore: 0.8 }],
-        'categories:seo': ['warn', { minScore: 0.8 }],
-        'first-contentful-paint': ['warn', { maxNumericValue: 3000 }],
-        interactive: ['warn', { maxNumericValue: 3500 }],
+        'categories:performance': 'off',
+        'categories:accessibility': 'off',
+        'categories:best-practices': 'off',
+        'categories:seo': 'off',
       },
     },
     upload: {

@@ -6,11 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 20.x
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: 18.x
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
+      - name: Build Nuxt
+        run: npm run build
       - name: Run Lighthouse CI
-        run: yarn ci
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          lhci autorun
+
+      - name: Debug information
+        run: |
+          ls -la .output/
+          cat .output/server/index.mjs
+          node -e "console.log(require('node:http').createServer().listen().address().port)"
