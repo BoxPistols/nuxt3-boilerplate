@@ -17,7 +17,7 @@
     "lh:view": "node scripts/open-lighthouse-report.js",
     "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
     "lh:all": "node scripts/open-all-lighthouse-reports.js",
-    "lh:ci": "yarn build && yarn lh"
+    "ci": "yarn build && yarn lh"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.22024/10/13 19:22:59 JST5",
