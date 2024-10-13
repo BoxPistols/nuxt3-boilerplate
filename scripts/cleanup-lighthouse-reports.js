@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const RESULTS_DIR = './lighthouse-results'
-const MAX_AGE_DAYS = 30
+const MAX_AGE_DAYS = 60
 
 // 30日以上前のファイルを削除
 const now = Date.now()
