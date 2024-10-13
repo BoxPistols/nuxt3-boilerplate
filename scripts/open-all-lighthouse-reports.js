@@ -8,7 +8,7 @@ import { exec } from 'node:child_process'
 
 const RESULTS_DIR = './lighthouse-results'
 const cmd = process.platform === 'win32' ? 'start' : 'open'
-const MAX_COUNT = 24
+const MAX_COUNT = 12
 const MAX_AGE_DAYS = 30
 const now = Date.now()
 
