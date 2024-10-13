@@ -23,6 +23,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'ja',
+      },
       title: 'My Awesome App', // サイトのタイトル
       meta: [
         { charset: 'utf-8' },
