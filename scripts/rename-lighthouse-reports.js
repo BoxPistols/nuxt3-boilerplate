@@ -21,11 +21,13 @@ function getCurrentJSTTimestamp() {
 }
 
 function renameFile(file) {
-  const match = file.match(/lighthouse-.*-report\.(.+)$/)
+  const match = file.match(
+    /lighthouse-(\d{4}_\d{2}_\d{2}T\d{2}_\d{2}_\d{2}\.\d{3}Z)-(.*)-(\d+)-report\.(.+)$/
+  )
   if (match) {
-    const [, extension] = match
+    const [, , pathname, counter, extension] = match
     const jstTimestamp = getCurrentJSTTimestamp()
-    const newFilename = `lighthouse-${jstTimestamp}-report.${extension}`
+    const newFilename = `lighthouse-${jstTimestamp}-${pathname}-${counter}-report.${extension}`
     const oldPath = path.join(RESULTS_DIR, file)
     const newPath = path.join(RESULTS_DIR, newFilename)
 
@@ -54,7 +56,10 @@ function main() {
       manifest.forEach(entry => {
         if (entry.htmlPath) {
           const oldBasename = path.basename(entry.htmlPath)
-          const newBasename = renamedFiles.find(file => file.endsWith('.html'))
+          const newBasename = renamedFiles.find(
+            file =>
+              file.endsWith('.html') && file.includes(oldBasename.split('-')[3])
+          )
           if (newBasename && newBasename !== oldBasename) {
             entry.htmlPath = path.join(RESULTS_DIR, newBasename)
             updated = true
@@ -62,7 +67,10 @@ function main() {
         }
         if (entry.jsonPath) {
           const oldBasename = path.basename(entry.jsonPath)
-          const newBasename = renamedFiles.find(file => file.endsWith('.json'))
+          const newBasename = renamedFiles.find(
+            file =>
+              file.endsWith('.json') && file.includes(oldBasename.split('-')[3])
+          )
           if (newBasename && newBasename !== oldBasename) {
             entry.jsonPath = path.join(RESULTS_DIR, newBasename)
             updated = true
