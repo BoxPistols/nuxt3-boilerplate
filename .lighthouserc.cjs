@@ -1,20 +1,21 @@
-// ファイル名を .lighthouserc.cjs に変更してください
 const os = require('node:os')
 const path = require('node:path')
 
 const isWindows = os.platform() === 'win32'
 const isWSL = os.release().toLowerCase().includes('microsoft')
 
+/** @type {import('@lhci/cli').Config} */
 module.exports = {
   ci: {
     collect: {
       url: ['http://localhost:3000'],
-      startServerCommand: 'npm run dev',
-      numberOfRuns: 3,
+      startServerCommand: 'bun run build && bun run preview',
+      maxWaitForLoad: 60000, // 60秒のタイムアウト
+      numberOfRuns: 1,
       settings: {
         chromeFlags: [
           '--no-sandbox',
-          '--headless',
+          '--headless=new',
           '--disable-gpu',
           '--disable-dev-shm-usage',
           '--disable-software-rasterizer',
