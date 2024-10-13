@@ -1,35 +1,12 @@
-# name: Lighthouse CI
-# on: [push, pull_request]
-
-# jobs:
-#   lhci:
-#     name: Lighthouse CI
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - name: Use Node.js 18.x
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: 18.x
-#       - name: Install dependencies
-#         run: yarn install --frozen-lockfile
-#       - name: Build Nuxt
-#         run: yarn build
-#       - name: Run Lighthouse CI
-#         run: |
-#           yarn global add @lhci/cli@0.12.x
-#           lhci autorun
-#       - name: Display Lighthouse Results
-#         run: |
-#           echo "Lighthouse Results:"
-#           jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"' lighthouse-results/manifest.json
-#       - name: Upload Lighthouse results
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: lighthouse-results
-#           path: lighthouse-results
 name: Lighthouse CI
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - ${{ github.event.repository.default_branch }}
+  pull_request:
+    branches:
+      - ${{ github.event.repository.default_branch }}
 
 jobs:
   lhci:
@@ -37,40 +14,55 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
       - name: Build Nuxt
         run: yarn build
+
       - name: Run Lighthouse CI
         run: |
           yarn global add @lhci/cli@0.12.x
           lhci autorun
+
       - name: Format Lighthouse Results
         id: format_results
         run: |
           RESULTS=$(jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"' lighthouse-results/manifest.json)
-          RESULTS="${RESULTS//'%'/'%25'}"
-          RESULTS="${RESULTS//$'\n'/'%0A'}"
-          RESULTS="${RESULTS//$'\r'/'%0D'}"
-          echo "::set-output name=results::$RESULTS"
+          echo "results<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESULTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Comment PR
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
+        env:
+          LIGHTHOUSE_RESULTS: ${{ steps.format_results.outputs.results }}
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            const results = process.env.LIGHTHOUSE_RESULTS;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '## Lighthouse Results\n\n```\n${{ steps.format_results.outputs.results }}\n```'
+              body: `## Lighthouse Results\n\n\`\`\`\n${results}\n\`\`\``
             })
+
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v3
         with:
           name: lighthouse-results
           path: lighthouse-results
+
+      - name: Lighthouse Check
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          uploadArtifacts: true
+          temporaryPublicStorage: true
