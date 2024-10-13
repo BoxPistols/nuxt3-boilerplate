@@ -44,9 +44,7 @@ module.exports = {
       },
     },
     upload: {
-      target: 'filesystem',
-      outputDir: './lighthouse-results',
-      reportFilenamePattern: 'lighthouse-%%DATETIME%%-report.%%EXTENSION%%',
+      target: 'temporary-public-storage',
     },
   },
   cachePath: path.join(os.tmpdir(), '.lighthouse'),
