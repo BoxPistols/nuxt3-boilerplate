@@ -1,10 +1,5 @@
 name: Lighthouse CI
-
-on:
-  push:
-    branches: [main] # mainブランチへの直接プッシュ時
-  pull_request:
-    branches: [main] # mainブランチへのPR時
+on: [push, pull_request]
 
 jobs:
   lhci:
@@ -58,9 +53,3 @@ jobs:
         with:
           name: lighthouse-results
           path: lighthouse-results
-
-      - name: Lighthouse Check
-        uses: treosh/lighthouse-ci-action@v10
-        with:
-          uploadArtifacts: true
-          temporaryPublicStorage: true
