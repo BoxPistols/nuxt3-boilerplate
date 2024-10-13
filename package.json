@@ -12,12 +12,13 @@
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
-    "fix": "yarn lint:fix && yarn format",
-    "lh": "lhci autorun && yarn lh:clean",
+    "lh": "lhci autorun && node scripts/process-lighthouse-reports.js",
     "lh:view": "node scripts/open-lighthouse-report.js",
-    "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
     "lh:all": "node scripts/open-all-lighthouse-reports.js",
-    "ci": "yarn build && yarn lh && node scripts/update-manifest-paths.js"
+    "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
+    "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
+    "ci": "yarn build && yarn lh && node scripts/update-manifest-paths.js",
+    "fix": "ci && yarn lint:fix && yarn format"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.22024/10/13 19:22:59 JST5",

@@ -4,7 +4,7 @@ import path from 'node:path'
 const RESULTS_DIR = './lighthouse-results'
 const MAX_AGE_DAYS = 60
 
-// 30日以上前のファイルを削除
+// MAX_AGE_DAYS日以上前のファイルを削除
 const now = Date.now()
 for (const file of fs.readdirSync(RESULTS_DIR)) {
   const filePath = path.join(RESULTS_DIR, file)
@@ -15,3 +15,27 @@ for (const file of fs.readdirSync(RESULTS_DIR)) {
     console.log(`Deleted ${filePath}`)
   }
 }
+
+// すべてのファイルを削除
+const removeAllReports = () => {
+  for (const file of fs.readdirSync(RESULTS_DIR)) {
+    const filePath = path.join(RESULTS_DIR, file)
+    fs.unlinkSync(filePath)
+    console.log(`Deleted ${filePath}`)
+  }
+}
+
+// メイン処理
+const main = args => {
+  const action = args[2]
+  switch (action) {
+    case 'cleanAll':
+      removeAllReports()
+      break
+    default:
+      console.error(`Unknown action: ${action}`)
+      break
+  }
+}
+
+main(process.argv)
