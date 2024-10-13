@@ -9,7 +9,7 @@ function getJSTDateFromFilename(fileName) {
     /lighthouse-(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_(\d{2})-report\.(html|json)$/
   )
   if (match) {
-    const [_, year, month, day, hour, minute, second] = match
+    const [, year, month, day, hour, minute, second] = match
     // JSTタイムゾーンを考慮したISO文字列を作成
     return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}+09:00`)
   }
