@@ -3,92 +3,55 @@ import path from 'node:path'
 
 const RESULTS_DIR = './lighthouse-results'
 
-/**
- * 現在の日本標準時（JST）を 'YYYY_MM_DD_HH_mm_SS' の形式で取得する関数
- * @returns {string} - 現在のJST時刻をフォーマットした文字列
- */
-function getCurrentJSTTimestamp() {
-  const now = new Date()
-  const jstOptions = {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }
-  const formatter = new Intl.DateTimeFormat('ja-JP', jstOptions)
-  const parts = formatter.formatToParts(now)
-  const dateParts = {}
-  for (const { type, value } of parts) {
-    if (type !== 'literal') {
-      dateParts[type] = value
-    }
-  }
-  return `${dateParts.year}_${dateParts.month}_${dateParts.day}_${dateParts.hour}_${dateParts.minute}_${dateParts.second}`
+function convertUTCtoJST(utcString) {
+  const date = new Date(
+    utcString.replace(/_/g, ':').replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3T')
+  )
+  date.setHours(date.getHours() + 9)
+  return `${date.toISOString().replace(/:/g, '_').replace('T', '_').split('.')[0]}Z`
 }
 
-/**
- * 現在のJST時刻を取得し、指定されたファイルのタイムスタンプ部分をオーバーライドしてリネームする関数
- * @param {string} filePath - 元のファイルのフルパス
- * @returns {string|null} - リネーム後のファイルパス、またはエラー時はnull
- */
-function renameFileToCurrentJST(filePath) {
-  const fileName = path.basename(filePath)
-  const match = fileName.match(
-    /lighthouse-\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}-report\.(html|json)$/
+function renameFile(file) {
+  const match = file.match(
+    /lighthouse-(\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2})-report\.(.+)$/
   )
   if (match) {
-    const extension = match[1]
-    const currentJST = getCurrentJSTTimestamp()
-    const newFilename = `lighthouse-${currentJST}-report.${extension}`
-    const newFilePath = path.join(path.dirname(filePath), newFilename)
-
-    // ファイル名の競合を避けるため、同名ファイルが存在しないことを確認
-    if (fs.existsSync(newFilePath)) {
-      console.error(
-        `Cannot rename ${fileName} to ${newFilename}: Target file already exists.`
-      )
-      return null
-    }
-
-    // ファイルのリネーム
-    try {
-      fs.renameSync(filePath, newFilePath)
-      console.log(`Renamed ${fileName} to ${newFilename}`)
-      return newFilePath
-    } catch (error) {
-      console.error(`Failed to rename ${fileName}: ${error}`)
-      return null
-    }
-  } else {
-    console.log(`Skipped ${fileName} - doesn't match expected format`)
-    return null
+    const [, utcTimestamp, extension] = match
+    const jstTimestamp = convertUTCtoJST(utcTimestamp)
+    const newFilename = `lighthouse-${jstTimestamp}-report.${extension}`
+    fs.renameSync(
+      path.join(RESULTS_DIR, file),
+      path.join(RESULTS_DIR, newFilename)
+    )
+    console.log(`Renamed ${file} to ${newFilename}`)
+    return newFilename
   }
+  return null
 }
 
-// メイン処理
-function main() {
-  const allFiles = fs.readdirSync(RESULTS_DIR)
+const files = fs.readdirSync(RESULTS_DIR)
+files.forEach(renameFile)
 
-  for (const file of allFiles) {
-    const filePath = path.join(RESULTS_DIR, file)
-
-    if (
-      file.startsWith('lighthouse-') &&
-      (file.endsWith('-report.html') || file.endsWith('-report.json'))
-    ) {
-      // ファイル名を現在のJST時刻でリネーム
-      const newFilePath = renameFileToCurrentJST(filePath)
-
-      if (newFilePath) {
-        console.log(`Renamed and ready to process: ${newFilePath}`)
+// manifest.jsonの更新
+const manifestPath = path.join(RESULTS_DIR, 'manifest.json')
+if (fs.existsSync(manifestPath)) {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  for (const entry of manifest) {
+    if (entry.htmlPath) {
+      const basename = path.basename(entry.htmlPath)
+      const newBasename = renameFile(basename)
+      if (newBasename) {
+        entry.htmlPath = entry.htmlPath.replace(basename, newBasename)
+      }
+    }
+    if (entry.jsonPath) {
+      const basename = path.basename(entry.jsonPath)
+      const newBasename = renameFile(basename)
+      if (newBasename) {
+        entry.jsonPath = entry.jsonPath.replace(basename, newBasename)
       }
     }
   }
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+  console.log('Updated manifest.json with new filenames')
 }
-
-// スクリプトの実行
-main()
