@@ -1,51 +1,45 @@
-import { platform, release, tmpdir } from 'node:os'
-import { join } from 'node:path'
+import fs from 'node:fs'
+import path from 'node:path'
 
-const isWindows = platform() === 'win32'
-const isWSL = release().toLowerCase().includes('microsoft')
+const RESULTS_DIR = './lighthouse-results'
 
-const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
+function processReport(filePath) {
+  let content = fs.readFileSync(filePath, 'utf8')
+  const fileName = path.basename(filePath)
+  const match = fileName.match(
+    /lighthouse-(\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2})-report/
+  )
 
-/** @type {import('@lhci/cli').Config} */
-export const ci = {
-  collect: {
-    url: [`${BASE_URL}/`],
-    startServerCommand: 'node .output/server/index.mjs',
-    startServerReadyPattern: 'Listening on',
-    maxWaitForLoad: 60000,
-    numberOfRuns: 1,
-    settings: {
-      chromeFlags: [
-        '--no-sandbox',
-        '--headless=new',
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-      ],
-      locale: 'ja', // 日本語ロケール
-      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-    },
-  },
-  assert: {
-    assertions: {
-      'categories:performance': ['warn', { minScore: 0.7 }],
-      'categories:accessibility': ['error', { minScore: 0.8 }],
-      'categories:best-practices': ['warn', { minScore: 0.8 }],
-      'categories:seo': ['warn', { minScore: 0.9 }],
-      'first-contentful-paint': ['warn', { maxNumericValue: 3000 }],
-      interactive: ['warn', { maxNumericValue: 3500 }],
-    },
-  },
-  upload: {
-    target: 'filesystem', // ローカルに保存
-    outputDir: './lighthouse-results', // 保存先ディレクトリ
-    reportFilenamePattern: 'lighthouse-%%DATETIME%%-report.%%EXTENSION%%', // レポートファイル名パターン
-  },
+  if (match) {
+    const dateTime = match[1]
+      .replace(/_/g, ':')
+      .replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3 ')
+    const infoDiv = `
+      <div id="lh-info" style="background-color: #f0f0f0; padding: 10px; text-align: center; font-family: Arial, sans-serif;">
+        <strong>Report generated (JST):</strong> ${dateTime}
+      </div>
+    `
+    content = content.replace('<body>', `<body>${infoDiv}`)
+    fs.writeFileSync(filePath, content)
+    console.log(`Updated ${fileName} with date/time information`)
+  } else {
+    console.log(`Skipped ${fileName} - doesn't match expected format`)
+  }
 }
-export const cachePath = join(tmpdir(), '.lighthouse')
 
-// WindowsやWSL環境向けの追加設定
-if (isWindows || isWSL) {
-  ci.collect.settings.chromeFlags.push('--disable-setuid-sandbox')
+function main() {
+  const htmlFiles = fs
+    .readdirSync(RESULTS_DIR)
+    .filter(file => file.endsWith('.html'))
+
+  if (htmlFiles.length === 0) {
+    console.log('No HTML reports found to process.')
+    return
+  }
+
+  for (const file of htmlFiles) {
+    processReport(path.join(RESULTS_DIR, file))
+  }
 }
+
+main()

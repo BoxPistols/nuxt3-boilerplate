@@ -103,5 +103,5 @@ sw.*
 .lighthouseci/
 lighthouse-results/*.html
 lighthouse-results/*.json
-
+!lighthouse-results/manifest.json
 

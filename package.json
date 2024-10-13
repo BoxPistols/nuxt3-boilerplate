@@ -21,7 +21,7 @@
     "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
     "ci": "yarn build && yarn lh && yarn lh:clean && node scripts/update-manifest-paths.js",
     "fix": "yarn lint:fix && yarn format",
-    "prepare": "husky"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.2.22024/10/13 19:22:59 JST5",

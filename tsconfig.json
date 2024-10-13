@@ -16,5 +16,6 @@
     },
     "types": ["@nuxt/types", "@types/node", "@nuxt/typescript-build"]
   },
-  "include": [".nuxt/nuxt.d.ts", "**/*"]
+  "include": [".nuxt/nuxt.d.ts", "**/*"],
+  "exclude": ["node_modules", "**/*.d.ts", ".nuxt"]
 }

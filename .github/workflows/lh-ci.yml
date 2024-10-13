@@ -32,8 +32,12 @@ jobs:
 
       - name: Sanitize manifest.json
         run: |
-          jq '.[].htmlPath = "" | .[].jsonPath = ""' lighthouse-results/manifest.json > lighthouse-results/manifest_sanitized.json
-          mv lighthouse-results/manifest_sanitized.json lighthouse-results/manifest.json
+          if [ -f lighthouse-results/manifest.json ]; then
+            jq '.[].htmlPath = "" | .[].jsonPath = ""' lighthouse-results/manifest.json > lighthouse-results/manifest_sanitized.json
+            mv lighthouse-results/manifest_sanitized.json lighthouse-results/manifest.json
+          else
+            echo "manifest.json not found. Skipping sanitization."
+          fi
 
       - name: Upload Lighthouse results as artifact
         uses: actions/upload-artifact@v3
