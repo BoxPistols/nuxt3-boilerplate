@@ -1,4 +1,5 @@
 name: Lighthouse CI
+
 on: [push, pull_request]
 
 jobs:
@@ -23,6 +24,14 @@ jobs:
         run: |
           yarn global add @lhci/cli@0.12.x
           lhci autorun
+
+      - name: Rename Lighthouse Reports
+        run: |
+          yarn lh:rename
+
+      - name: Process Lighthouse Reports
+        run: |
+          yarn lh:process
 
       - name: Format Lighthouse Results
         id: format_results
@@ -53,3 +62,14 @@ jobs:
         with:
           name: lighthouse-results
           path: lighthouse-results
+
+      - name: Lighthouse Check
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Display Lighthouse Results
+        run: |
+          echo "Lighthouse Results:"
+          cat lighthouse-results/manifest.json | jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"'
