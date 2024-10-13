@@ -9,7 +9,8 @@ module.exports = {
   ci: {
     collect: {
       url: ['http://localhost:3000'],
-      startServerCommand: 'bun run build && bun run preview',
+      staticDistDir: '.output/public',
+      startServerCommand: 'yarn run build && yarn run preview',
       maxWaitForLoad: 60000, // 60秒のタイムアウト
       numberOfRuns: 1,
       settings: {
