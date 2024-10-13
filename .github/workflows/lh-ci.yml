@@ -9,6 +9,8 @@ jobs:
     permissions:
       contents: read
       checks: write # Checks API に書き込み権限を付与
+    env:
+      LIGHTHOUSE_BASE_URL: ${{ secrets.LIGHTHOUSE_BASE_URL }} # 環境変数を設定
     steps:
       - uses: actions/checkout@v3
 
@@ -23,14 +25,15 @@ jobs:
       - name: Build Nuxt
         run: yarn build
 
-      - name: Run Lighthouse CI and Report to GitHub Checks
-        uses: treosh/lighthouse-ci-action@v10
-        with:
-          configPath: .lighthouserc.cjs # 必要に応じて設定ファイルのパスを指定
-          uploadArtifacts: false
-          temporaryPublicStorage: false # 必要に応じて変更
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Lighthouse CI
+        run: |
+          yarn global add @lhci/cli@0.12.x
+          lhci autorun --upload.target=temporary-public-storage
+
+      - name: Sanitize manifest.json
+        run: |
+          jq '.[].htmlPath = "" | .[].jsonPath = ""' lighthouse-results/manifest.json > lighthouse-results/manifest_sanitized.json
+          mv lighthouse-results/manifest_sanitized.json lighthouse-results/manifest.json
 
       - name: Upload Lighthouse results as artifact
         uses: actions/upload-artifact@v3
