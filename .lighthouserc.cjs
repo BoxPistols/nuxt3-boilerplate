@@ -8,9 +8,9 @@ const isWSL = os.release().toLowerCase().includes('microsoft')
 module.exports = {
   ci: {
     collect: {
-      url: ['http://localhost:3000'],
+      url: ['http://localhost:3333'],
+      startServerCommand: 'yarn build && yarn preview --port 3333',
       staticDistDir: '.output/public',
-      startServerCommand: 'yarn build && yarn preview',
       maxWaitForLoad: 120000, // 120秒のタイムアウト
       numberOfRuns: 3,
       settings: {
