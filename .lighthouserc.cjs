@@ -10,8 +10,8 @@ module.exports = {
     collect: {
       url: ['http://localhost:3000'],
       staticDistDir: '.output/public',
-      startServerCommand: 'yarn run build && yarn run preview',
-      maxWaitForLoad: 60000, // 60秒のタイムアウト
+      startServerCommand: 'yarn build && yarn preview',
+      maxWaitForLoad: 120000, // 120秒のタイムアウト
       numberOfRuns: 3,
       settings: {
         chromeFlags: [

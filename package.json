@@ -16,7 +16,7 @@
     "lh": "lhci autorun",
     "lh:view": "node scripts/open-lighthouse-report.js",
     "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
-    "lh:view:all": "node scripts/open-all-lighthouse-reports.js",
+    "lh:all": "node scripts/open-all-lighthouse-reports.js",
     "ci": "yarn build && yarn lh"
   },
   "devDependencies": {
