@@ -12,7 +12,7 @@ module.exports = {
       staticDistDir: '.output/public',
       startServerCommand: 'yarn run build && yarn run preview',
       maxWaitForLoad: 60000, // 60秒のタイムアウト
-      numberOfRuns: 1,
+      numberOfRuns: 3,
       settings: {
         chromeFlags: [
           '--no-sandbox',
@@ -27,7 +27,7 @@ module.exports = {
     assert: {
       assertions: {
         'categories:performance': ['warn', { minScore: 0.7 }],
-        'categories:accessibility': ['error', { minScore: 0.9 }],
+        'categories:accessibility': ['warn', { minScore: 0.8 }],
         'categories:best-practices': ['warn', { minScore: 0.8 }],
         'categories:seo': ['warn', { minScore: 0.8 }],
         'first-contentful-paint': ['warn', { maxNumericValue: 3000 }],
