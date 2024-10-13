@@ -11,16 +11,17 @@ jobs:
         with:
           node-version: 18.x
       - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build Nuxt and Run Lighthouse CI
         run: yarn ci
-      - name: Build Nuxt
-        run: yarn run build
+      - name: Install Lighthouse CI
+        run: yarn global add @lhci/cli@0.12.x
       - name: Run Lighthouse CI
-        run: |
-          yarn install -g @lhci/cli@0.12.x
-          lhci autorun
-
+        run: lhci autorun
       - name: Debug information
         run: |
           ls -la .output/
           cat .output/server/index.mjs
           node -e "console.log(require('node:http').createServer().listen().address().port)"
+      - name: Run Lighthouse CI
+        run: yarn lh

@@ -12,7 +12,7 @@ module.exports = {
       startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
       maxWaitForLoad: 120000,
-      numberOfRuns: 1,
+      numberOfRuns: 3,
       settings: {
         chromeFlags: [
           '--no-sandbox',
@@ -43,6 +43,7 @@ module.exports = {
     upload: {
       target: 'filesystem',
       outputDir: './lighthouse-results',
+      reportFilenamePattern: '%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%',
     },
   },
   cachePath: path.join(os.tmpdir(), '.lighthouse'),

@@ -1,9 +1,33 @@
 [
   {
     "url": "http://localhost:3000/",
+    "isRepresentativeRun": false,
+    "htmlPath": "lighthouse-results/_-2024_10_13_13_10_31-report.html",
+    "jsonPath": "lighthouse-results/_-2024_10_13_13_10_31-report.json",
+    "summary": {
+      "performance": 0.98,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": false,
+    "htmlPath": "lighthouse-results/_-2024_10_13_13_11_01-report.html",
+    "jsonPath": "lighthouse-results/_-2024_10_13_13_11_01-report.json",
+    "summary": {
+      "performance": 0.98,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/",
     "isRepresentativeRun": true,
-    "htmlPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/localhost-_-2024_10_13_12_45_15.report.html",
-    "jsonPath": "/Users/ai/dev/Front/Vue/nuxt3-boilerplate/lighthouse-results/localhost-_-2024_10_13_12_45_15.report.json",
+    "htmlPath": "lighthouse-results/_-2024_10_13_13_10_45-report.html",
+    "jsonPath": "lighthouse-results/_-2024_10_13_13_10_45-report.json",
     "summary": {
       "performance": 0.98,
       "accessibility": 1,
