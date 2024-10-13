@@ -5,10 +5,16 @@ const RESULTS_DIR = './lighthouse-results'
 
 function convertUTCtoJST(utcString) {
   const date = new Date(
-    utcString.replace(/_/g, ':').replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3T')
+    `${utcString
+      .replace(/_/g, ':')
+      .replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3T')}Z`
   )
   date.setHours(date.getHours() + 9)
-  return `${date.toISOString().replace(/:/g, '_').replace('T', '_').split('.')[0]}Z`
+  return date
+    .toISOString()
+    .replace(/[-:]/g, '_')
+    .replace(/T/, '_')
+    .split('.')[0]
 }
 
 function renameFile(file) {
@@ -19,12 +25,16 @@ function renameFile(file) {
     const [, utcTimestamp, extension] = match
     const jstTimestamp = convertUTCtoJST(utcTimestamp)
     const newFilename = `lighthouse-${jstTimestamp}-report.${extension}`
-    fs.renameSync(
-      path.join(RESULTS_DIR, file),
-      path.join(RESULTS_DIR, newFilename)
-    )
-    console.log(`Renamed ${file} to ${newFilename}`)
-    return newFilename
+    const oldPath = path.join(RESULTS_DIR, file)
+    const newPath = path.join(RESULTS_DIR, newFilename)
+
+    if (oldPath !== newPath) {
+      fs.renameSync(oldPath, newPath)
+      console.log(`Renamed ${file} to ${newFilename}`)
+      return newFilename
+    }
+    console.log(`File ${file} already has the correct name`)
+    return file
   }
   return null
 }
@@ -36,22 +46,29 @@ files.forEach(renameFile)
 const manifestPath = path.join(RESULTS_DIR, 'manifest.json')
 if (fs.existsSync(manifestPath)) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  let updated = false
   for (const entry of manifest) {
     if (entry.htmlPath) {
       const basename = path.basename(entry.htmlPath)
       const newBasename = renameFile(basename)
-      if (newBasename) {
+      if (newBasename && newBasename !== basename) {
         entry.htmlPath = entry.htmlPath.replace(basename, newBasename)
+        updated = true
       }
     }
     if (entry.jsonPath) {
       const basename = path.basename(entry.jsonPath)
       const newBasename = renameFile(basename)
-      if (newBasename) {
+      if (newBasename && newBasename !== basename) {
         entry.jsonPath = entry.jsonPath.replace(basename, newBasename)
+        updated = true
       }
     }
   }
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-  console.log('Updated manifest.json with new filenames')
+  if (updated) {
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+    console.log('Updated manifest.json with new filenames')
+  } else {
+    console.log('No changes needed in manifest.json')
+  }
 }

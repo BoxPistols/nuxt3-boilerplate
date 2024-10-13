@@ -14,14 +14,20 @@ function processReport(filePath) {
     const dateTime = match[1]
       .replace(/_/g, ':')
       .replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3 ')
-    const infoDiv = `
-      <div id="lh-info" style="background-color: #f0f0f0; padding: 10px; text-align: center; font-family: Arial, sans-serif;">
-        <strong>Report generated (JST):</strong> ${dateTime}
-      </div>
-    `
-    content = content.replace('<body>', `<body>${infoDiv}`)
-    fs.writeFileSync(filePath, content)
-    console.log(`Updated ${fileName} with date/time information`)
+
+    // 既存の lh-info div を確認
+    if (!content.includes('id="lh-info"')) {
+      const infoDiv = `
+        <div id="lh-info" style="background-color: #f0f0f0; padding: 10px; text-align: center; font-family: Arial, sans-serif;">
+          <strong>Report generated (JST):</strong> ${dateTime}
+        </div>
+      `
+      content = content.replace('<body>', `<body>${infoDiv}`)
+      fs.writeFileSync(filePath, content)
+      console.log(`Updated ${fileName} with date/time information`)
+    } else {
+      console.log(`${fileName} already contains date/time information`)
+    }
   } else {
     console.log(`Skipped ${fileName} - doesn't match expected format`)
   }
