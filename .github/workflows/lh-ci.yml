@@ -10,10 +10,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20.x
-      - name: yarn install, build
-        run: |
-          yarn run ci
-          yarn run build
-      - name: run Lighthouse CI
-        run: |
-          yarn run lh:ci
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Run Lighthouse CI
+        run: yarn ci
