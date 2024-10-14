@@ -4,21 +4,21 @@ import path from 'node:path'
 const RESULTS_DIR = './lighthouse-results'
 
 function getCurrentJSTTimestamp() {
-  // 現在の時刻を日本時間に変換する
   const now = new Date()
-  const jstDate = new Date(
-    now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
-  )
-  const pad = num => num.toString().padStart(2, '0')
 
-  const year = jstDate.getFullYear()
-  const month = pad(jstDate.getMonth() + 1)
-  const day = pad(jstDate.getDate())
-  const hours = pad(jstDate.getHours())
-  const minutes = pad(jstDate.getMinutes())
-  const seconds = pad(jstDate.getSeconds())
-
-  return `${year}_${month}_${day}_${hours}_${minutes}_${seconds}`
+  // JSTのタイムゾーンでの表示
+  return now
+    .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+    .replace(/\//g, '_')
 }
 
 function renameFile(file) {
@@ -64,7 +64,10 @@ function main() {
               file.endsWith('.html') && file.includes(oldBasename.split('-')[3])
           )
           if (newBasename && newBasename !== oldBasename) {
-            entry.htmlPath = path.join(RESULTS_DIR, newBasename)
+            entry.htmlPath = path.relative(
+              process.cwd(),
+              path.join(RESULTS_DIR, newBasename)
+            ) // 相対パスに変換
             updated = true
           }
         }
@@ -75,7 +78,10 @@ function main() {
               file.endsWith('.json') && file.includes(oldBasename.split('-')[3])
           )
           if (newBasename && newBasename !== oldBasename) {
-            entry.jsonPath = path.join(RESULTS_DIR, newBasename)
+            entry.jsonPath = path.relative(
+              process.cwd(),
+              path.join(RESULTS_DIR, newBasename)
+            ) // 相対パスに変換
             updated = true
           }
         }
@@ -83,7 +89,9 @@ function main() {
 
       if (updated) {
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-        console.log('Updated manifest.json with new filenames')
+        console.log(
+          'Updated manifest.json with new filenames and relative paths'
+        )
       } else {
         console.log('No changes needed in manifest.json')
       }

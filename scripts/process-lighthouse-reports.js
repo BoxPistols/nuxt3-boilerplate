@@ -5,11 +5,11 @@ const RESULTS_DIR = './lighthouse-results'
 
 function getCurrentJSTTimestamp() {
   const now = new Date()
-  const jstDate = new Date(
-    now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
-  )
-  return jstDate
+
+  // JSTのタイムゾーンでの表示
+  return now
     .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
