@@ -6,19 +6,20 @@ const RESULTS_DIR = './lighthouse-results'
 function getCurrentJSTTimestamp() {
   const now = new Date()
 
-  // JSTのタイムゾーンでの表示
-  return now
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })
-    .replace(/\//g, '_')
+  // JSTに変換（UTC+9のオフセットを手動で追加）
+  const jstOffset = 9 * 60 * 60 * 1000 // 9時間のオフセット
+  const jstDate = new Date(now.getTime() + jstOffset)
+
+  const pad = num => num.toString().padStart(2, '0')
+
+  const year = jstDate.getFullYear()
+  const month = pad(jstDate.getMonth() + 1)
+  const day = pad(jstDate.getDate())
+  const hours = pad(jstDate.getHours())
+  const minutes = pad(jstDate.getMinutes())
+  const seconds = pad(jstDate.getSeconds())
+
+  return `${year}_${month}_${day}_${hours}_${minutes}_${seconds}`
 }
 
 function renameFile(file) {
@@ -28,7 +29,7 @@ function renameFile(file) {
   )
   if (match) {
     const [, , pathname, counter, extension] = match
-    // 日本時間のタイムスタンプに変換
+    // JSTのタイムスタンプに変換
     const jstTimestamp = getCurrentJSTTimestamp()
     const newFilename = `lighthouse-${jstTimestamp}-${pathname}-${counter}-report.${extension}`
     const oldPath = path.join(RESULTS_DIR, file)
