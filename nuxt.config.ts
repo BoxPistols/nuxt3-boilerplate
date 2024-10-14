@@ -23,6 +23,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'ja',
+      },
       title: 'My Awesome App', // サイトのタイトル
       meta: [
         { charset: 'utf-8' },
@@ -69,6 +72,9 @@ export default defineNuxtConfig({
       ],
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
+  },
+  nitro: {
+    preset: 'node-server',
   },
 
   modules: ['@nuxtjs/tailwindcss'],

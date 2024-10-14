@@ -6,16 +6,23 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare && husky install",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
-    "fix": "yarn lint:fix && yarn format"
+    "lh": "yarn build && lhci autorun && node scripts/process-lighthouse-reports.js && node scripts/rename-lighthouse-reports.js && yarn lh:view",
+    "lh:view": "node scripts/open-lighthouse-report.js",
+    "lh:all": "node scripts/open-all-lighthouse-reports.js",
+    "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
+    "ci": "yarn build && node scripts/cleanup-lighthouse-reports.js",
+    "fix": "yarn lint:fix && yarn format",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^1.2.25",
+    "@chromatic-com/storybook": "^1.2.22024/10/13 19:22:59 JST5",
+    "@lhci/cli": "^0.14.0",
     "@nuxt/devtools": "^1.0.3",
     "@nuxt/typescript-build": "^3.0.2",
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
@@ -31,6 +38,7 @@
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@vue/compiler-sfc": "^3.4.21",
     "autoprefixer": "^10.4.19",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
@@ -38,7 +46,8 @@
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-vue": "^9.24.0",
-    "husky": "^8.0.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "nuxt": "^3.8.2",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
@@ -51,5 +60,16 @@
   "volta": {
     "node": "20.13.1",
     "yarn": "1.22.22"
+  },
+  "dependencies": {
+    "@nuxt/types": "^2.18.1",
+    "install": "^0.13.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,json,md}": "prettier --write"
   }
 }

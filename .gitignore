@@ -95,3 +95,13 @@ sw.*
 .vercel
 
 *storybook.log
+
+# Environment variables
+.env
+
+# Lighthouse CI generated files
+.lighthouseci/
+lighthouse-results/*.html
+lighthouse-results/*.json
+# !lighthouse-results/manifest.json
+lighthouse-results/manifest.json

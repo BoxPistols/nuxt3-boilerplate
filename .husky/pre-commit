@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-yarn prettier --write .
+lint-staged && yarn prettier --write . && git add . && node scripts/cleanup-lighthouse-reports.js
 git add .
