@@ -11,9 +11,9 @@ const RESULTS_DIR = './lighthouse-results'
 function extractJSTTimestampFromHtml(filePath) {
   const content = fs.readFileSync(filePath, 'utf8')
 
-  // JSTのタイムスタンプをReport generated (JST)から抽出
+  // JSTのタイムスタンプをReport generated (JST)から抽出（スペースや改行に対応）
   const match = content.match(
-    /<strong>Report generated \(JST\):<\/strong>\s*([\d\- :]+)/
+    /<strong>\s*Report generated \(JST\):\s*<\/strong>\s*([\d\- :]+)/
   )
   if (match) {
     const timestamp = match[1]

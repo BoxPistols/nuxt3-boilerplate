@@ -13,6 +13,7 @@ module.exports = {
       url: [`${BASE_URL}/`],
       startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
+      startServerCommand: 'yarn start',
       maxWaitForLoad: 60000,
       numberOfRuns: 1,
       settings: {
@@ -44,7 +45,8 @@ module.exports = {
       },
     },
     upload: {
-      target: 'filesystem',
+      // target: 'filesystem',
+      target: 'temporary-public-storage', // CIでは一時的なストレージにアップロード
       outputDir: './lighthouse-results',
       reportFilenamePattern:
         'lighthouse-%%DATETIME%%-%%PATHNAME%%-report.%%EXTENSION%%',
