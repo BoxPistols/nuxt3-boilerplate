@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      checks: write # Checks API に書き込み権限を付与
+      checks: write
     env:
       LIGHTHOUSE_BASE_URL: 'http://localhost:3000'
     steps:
@@ -39,8 +39,10 @@ jobs:
             echo "manifest.json not found. Skipping sanitization."
           fi
 
-      - name: Remove manifest.json after processing
-        run: rm lighthouse-results/manifest.json
+      - name: Display Lighthouse Results
+        run: |
+          echo "Lighthouse Results:"
+          cat lighthouse-results/manifest.json | jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"'
 
       - name: Upload Lighthouse results as artifact
         uses: actions/upload-artifact@v3
@@ -48,9 +50,8 @@ jobs:
           name: lighthouse-results
           path: lighthouse-results
 
-      - name: Display Lighthouse Results
-        run: |
-          echo "Lighthouse Results:"
-          cat lighthouse-results/manifest.json | jq -r '.[] | "URL: \(.url)\nPerformance: \(.summary.performance)\nAccessibility: \(.summary.accessibility)\nBest Practices: \(.summary["best-practices"])\nSEO: \(.summary.seo)\n"'
       - name: Process Lighthouse reports
         run: yarn lh:process
+
+      - name: Remove manifest.json after processing
+        run: rm lighthouse-results/manifest.json
