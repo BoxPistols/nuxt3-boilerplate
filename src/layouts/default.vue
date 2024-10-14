@@ -1,3 +1,4 @@
+<!-- layouts/default.vue -->
 <template>
   <div class="flex flex-col min-h-screen">
     <header
@@ -7,25 +8,28 @@
         <h1 class="text-3xl font-bold">My Tech Site</h1>
         <ul class="flex space-x-6">
           <li>
-            <a href="#features" class="hover:text-blue-400">Features</a>
+            <NuxtLink to="/" class="hover:text-blue-400">Home</NuxtLink>
           </li>
           <li>
-            <a href="#about" class="hover:text-blue-400">About</a>
+            <NuxtLink to="/features" class="hover:text-blue-400"
+              >Features</NuxtLink
+            >
           </li>
           <li>
-            <a href="#contact" class="hover:text-blue-400">Contact</a>
+            <NuxtLink to="/about" class="hover:text-blue-400">About</NuxtLink>
           </li>
         </ul>
       </nav>
     </header>
-    <slot class="flex-grow"></slot>
+    <!-- 共通レイアウトです -->
+    <main class="flex-grow mt-16 pt-4">
+      <slot></slot>
+    </main>
     <footer class="py-4 text-center text-sm bg-techBlue">
       © 2024 My Tech Site. All rights reserved.
     </footer>
   </div>
 </template>
-
-<script setup></script>
 
 <style scoped>
 header,
