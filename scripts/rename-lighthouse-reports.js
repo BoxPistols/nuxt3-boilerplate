@@ -10,8 +10,8 @@ function getCurrentJSTTimestamp() {
   const now = new Date()
 
   // 日本標準時（JST）を取得
-  const jstOffset = 9 * 60 * 60 * 1000 // 9時間のオフセットをミリ秒で計算
-  const jstDate = new Date(now.getTime() + jstOffset) // UTCから9時間を追加
+  // const jstOffset = 9 * 60 * 60 * 1000 // 9時間のオフセットをミリ秒で計算
+  const jstDate = new Date(now.getTime())
 
   const pad = num => num.toString().padStart(2, '0')
 
