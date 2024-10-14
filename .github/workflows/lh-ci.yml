@@ -39,6 +39,9 @@ jobs:
             echo "manifest.json not found. Skipping sanitization."
           fi
 
+      - name: Remove manifest.json after processing
+        run: rm lighthouse-results/manifest.json
+
       - name: Upload Lighthouse results as artifact
         uses: actions/upload-artifact@v3
         with:
