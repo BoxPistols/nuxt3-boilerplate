@@ -20,7 +20,7 @@
     "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
     "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
     "manifest": "node scripts/update-manifest-paths.js",
-    "ci": "yarn build && yarn lh && yarn lh:clean && yarn manifest",
+    "ci": "yarn build && yarn lh && yarn lh:clean",
     "fix": "yarn lint:fix && yarn format",
     "prepare": "husky install"
   },

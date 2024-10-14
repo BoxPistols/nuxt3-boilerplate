@@ -1,2 +1,3 @@
 lint-staged && yarn prettier --write .
+node scripts/update-manifest-paths.js
 git add .
