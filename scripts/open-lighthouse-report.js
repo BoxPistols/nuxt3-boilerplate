@@ -2,37 +2,73 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
 
-const RESULTS_DIR = 'lighthouse-results'
-const MAX_REPORTS = 1
+const RESULTS_DIR = './lighthouse-results'
 const cmd = process.platform === 'win32' ? 'start' : 'open'
+const MAX_AGE_DAYS = 30
+const now = Date.now()
 
-// 最新のHTMLレポートファイルを取得（最大3件）
-const getLatestReports = () => {
-  const htmlFiles = fs
+// Function to get file age in days
+const getFileAge = filePath => {
+  const stat = fs.statSync(filePath)
+  return (now - stat.mtimeMs) / (24 * 60 * 60 * 1000)
+}
+
+// Get all report files and sort by modification time (newest first)
+const getAllReports = () => {
+  return fs
     .readdirSync(RESULTS_DIR)
     .filter(file => file.endsWith('.html'))
-    .map(file => path.join(RESULTS_DIR, file))
-    .sort((a, b) => fs.statSync(b).mtime - fs.statSync(a).mtime)
-    .slice(0, MAX_REPORTS)
-
-  return htmlFiles
+    .map(file => ({
+      name: file,
+      path: path.join(RESULTS_DIR, file),
+      age: getFileAge(path.join(RESULTS_DIR, file)),
+    }))
+    .sort((a, b) => a.age - b.age)
 }
 
-const latestReports = getLatestReports()
+// Delete old files
+const deleteOldReports = (reports, maxAgeDays) => {
+  reports.forEach(file => {
+    if (file.age > maxAgeDays) {
+      fs.unlinkSync(file.path)
+      console.log(`Deleted ${file.name}`)
+    }
+  })
+}
 
-if (latestReports.length > 0) {
-  for (const report of latestReports) {
-    exec(`${cmd} "${report}"`, error => {
-      if (error) {
-        console.error(
-          `Error opening Lighthouse report ${path.basename(report)}:`,
-          error
-        )
-      } else {
-        console.log(`Opened Lighthouse report: ${path.basename(report)}`)
-      }
-    })
+// Open reports
+const openReports = (reports, maxCount) => {
+  const reportsToOpen = reports.slice(0, maxCount)
+
+  if (reportsToOpen.length === 0) {
+    console.log(
+      'No recent HTML reports found in the lighthouse-results directory.'
+    )
+  } else {
+    for (const file of reportsToOpen) {
+      exec(`${cmd} "${file.path}"`, error => {
+        if (error) {
+          console.error(`Error opening ${file.name}:`, error)
+        } else {
+          console.log(`Opened ${file.name}`)
+        }
+      })
+    }
   }
-} else {
-  console.log('No Lighthouse HTML reports found.')
 }
+
+// Main function
+const main = () => {
+  const args = process.argv.slice(2)
+  const maxCount = parseInt(args[0]) || 1
+  const maxAgeDays = parseInt(args[1]) || MAX_AGE_DAYS
+
+  const allReports = getAllReports()
+  deleteOldReports(allReports, maxAgeDays)
+  openReports(
+    allReports.filter(file => file.age <= maxAgeDays),
+    maxCount
+  )
+}
+
+main()
