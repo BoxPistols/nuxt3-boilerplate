@@ -13,7 +13,6 @@ module.exports = {
       url: [`${BASE_URL}/`],
       startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
-      startServerCommand: 'yarn start',
       maxWaitForLoad: 60000,
       numberOfRuns: 1,
       settings: {
