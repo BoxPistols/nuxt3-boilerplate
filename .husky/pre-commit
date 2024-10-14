@@ -1,2 +1,2 @@
-lint-staged && yarn prettier --write . && yarn manifest && git add . && node scripts/cleanup-lighthouse-reports.js
+lint-staged && yarn prettier --write . && git add . && node scripts/cleanup-lighthouse-reports.js
 git add .

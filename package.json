@@ -15,13 +15,12 @@
     "lh:rename": "node scripts/rename-lighthouse-reports.js",
     "lh:process": "node scripts/process-lighthouse-reports.js",
     "lh:view": "node scripts/open-lighthouse-report.js",
-    "lh": "yarn build && lhci autorun && yarn lh:process && yarn lh:rename && yarn lh:view && yarn manifest",
+    "lh": "yarn build && lhci autorun && yarn lh:process && yarn lh:rename && yarn lh:view",
     "lh:all": "node scripts/open-all-lighthouse-reports.js",
     "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
     "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
-    "manifest": "node scripts/update-manifest-paths.js",
     "ci": "yarn build && yarn lh:clean",
-    "fix": "yarn lint:fix && yarn format && yarn manifest",
+    "fix": "yarn lint:fix && yarn format",
     "prepare": "husky install"
   },
   "devDependencies": {
