@@ -1,2 +1,2 @@
-lint-staged && yarn prettier --write .
+lint-staged && yarn prettier --write . && yarn manifest
 git add .
