@@ -2,14 +2,14 @@
   {
     "url": "http://localhost:3000/",
     "isRepresentativeRun": true,
-    "htmlPath": "lighthouse-results/lighthouse-2024_10_14_00_39_17-_-report.html",
-    "jsonPath": "lighthouse-results/lighthouse-2024_10_14_00_39_17-_-report.json",
+    "htmlPath": "lighthouse-results/lighthouse-2024_10_14_00_42_18-_-report.html",
+    "jsonPath": "lighthouse-results/lighthouse-2024_10_14_00_42_18-_-report.json",
     "summary": {
       "performance": 0.98,
       "accessibility": 1,
       "best-practices": 1,
       "seo": 1
     },
-    "timestamp": "2024-10-14 09:41:40"
+    "timestamp": "2024-10-14 09:46:02"
   }
 ]
