@@ -1,0 +1,62 @@
+[
+  {
+    "name": "docs",
+    "color": "0075ca",
+    "description": "ドキュメント系の追加、更新"
+  },
+  {
+    "name": "Front",
+    "color": "008672",
+    "description": "フロントエンド自体の課題=BFF課題/U|課題は含まない"
+  },
+  {
+    "name": "CSS",
+    "color": "e4e669",
+    "description": "Ul-Design CSS設計UIデザイン自体の課題"
+  },
+  {
+    "name": "UI Library",
+    "color": "0052CC",
+    "description": "UIライブラリ自体が主題の課題。組み込み、UIの拡張など"
+  },
+  {
+    "name": "UI Test",
+    "color": "7057ff",
+    "description": "UI検証、デザイン確定はしていない状態で仮Uの設計/実装"
+  },
+  {
+    "name": "Layout",
+    "color": "EE0E52",
+    "description": "UIレイアウト構造がメインのU課題"
+  },
+  {
+    "name": "UX Design",
+    "color": "d876e3",
+    "description": "非機能なUIUX課題、ユーザビリティ、アクセシビリティ対応"
+  },
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "バグ、不具合の対応"
+  },
+  {
+    "name": "env",
+    "color": "16C9F5",
+    "description": "パッケージの追加、選定検証、変更、アップデート"
+  },
+  {
+    "name": "BFF",
+    "color": "bfdadc",
+    "description": "Backend for FrontEnd"
+  },
+  {
+    "name": "BackEnd",
+    "color": "9F28C3",
+    "description": "バックエンド課題"
+  },
+  {
+    "name": "Draft",
+    "color": "cfd3d7",
+    "description": "進行中"
+  }
+]
