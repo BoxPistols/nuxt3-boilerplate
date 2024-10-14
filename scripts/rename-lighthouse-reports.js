@@ -4,9 +4,10 @@ import path from 'node:path'
 const RESULTS_DIR = './lighthouse-results'
 
 function getCurrentJSTTimestamp() {
+  // 現在の時刻を日本時間に変換する
   const now = new Date()
   const jstDate = new Date(
-    now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
+    now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
   )
   const pad = num => num.toString().padStart(2, '0')
 
@@ -21,11 +22,13 @@ function getCurrentJSTTimestamp() {
 }
 
 function renameFile(file) {
+  // UTCタイムスタンプからファイルを検索
   const match = file.match(
     /lighthouse-(\d{4}_\d{2}_\d{2}T\d{2}_\d{2}_\d{2}\.\d{3}Z)-(.*)-(\d+)-report\.(.+)$/
   )
   if (match) {
     const [, , pathname, counter, extension] = match
+    // 日本時間のタイムスタンプに変換
     const jstTimestamp = getCurrentJSTTimestamp()
     const newFilename = `lighthouse-${jstTimestamp}-${pathname}-${counter}-report.${extension}`
     const oldPath = path.join(RESULTS_DIR, file)
