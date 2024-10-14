@@ -1,26 +1,31 @@
+// 必要なモジュールをインポート
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
 
-const RESULTS_DIR = './lighthouse-results'
-const cmd = process.platform === 'win32' ? 'start' : 'open'
-const MAX_AGE_DAYS = 30
+// 定数の定義
+const RESULTS_DIR = './lighthouse-results' // Lighthouseの結果を保存するディレクトリ
+const cmd = process.platform === 'win32' ? 'start' : 'open' // OSに応じてファイルを開くコマンドを設定
+const MAX_AGE_DAYS = 30 // レポートの最大保持日数
 
+// 日本標準時（JST）の日付を取得する関数
 function getJSTDate(date) {
   return new Date(date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }))
 }
 
+// ファイル名用の日付フォーマット関数
 function formatDateForFilename(date) {
-  const year = date.getFullYear().toString().slice(2)
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const hour = date.getHours().toString().padStart(2, '0')
-  const minute = date.getMinutes().toString().padStart(2, '0')
-  const second = date.getSeconds().toString().padStart(2, '0')
+  const year = date.getFullYear().toString().slice(2) // 年の下2桁
+  const month = (date.getMonth() + 1).toString().padStart(2, '0') // 月（2桁）
+  const day = date.getDate().toString().padStart(2, '0') // 日（2桁）
+  const hour = date.getHours().toString().padStart(2, '0') // 時（2桁）
+  const minute = date.getMinutes().toString().padStart(2, '0') // 分（2桁）
+  const second = date.getSeconds().toString().padStart(2, '0') // 秒（2桁）
 
   return `lh_${year}-${month}${day}-${hour}${minute}-${second}`
 }
 
+// 表示用の日付フォーマット関数
 function formatDateForDisplay(date) {
   return date
     .toLocaleString('ja-JP', {
@@ -36,13 +41,19 @@ function formatDateForDisplay(date) {
     .replace(/\//g, '-')
 }
 
+// 新しく生成されたファイルかどうかを判断する関数
 function isNewFile(file) {
-  return file.startsWith('lighthouse-') || file === 'report.json'
+  return (
+    file.startsWith('lighthouse-') ||
+    file === 'report.json' ||
+    file === 'manifest.json'
+  )
 }
 
+// レポートのリネームと処理を行う主要な関数
 function renameAndProcessReports() {
-  const files = fs.readdirSync(RESULTS_DIR)
-  const newFiles = files.filter(isNewFile)
+  const files = fs.readdirSync(RESULTS_DIR) // 結果ディレクトリ内のファイルを取得
+  const newFiles = files.filter(isNewFile) // 新しいファイルのみをフィルタリング
 
   if (newFiles.length === 0) {
     console.log('No new Lighthouse reports found.')
@@ -58,7 +69,10 @@ function renameAndProcessReports() {
     const fileExtension = path.extname(file)
     let newFilename
 
-    if (file === 'report.json') {
+    // ファイルタイプに応じて新しいファイル名を決定
+    if (file === 'manifest.json') {
+      newFilename = `${jstTimestamp}_summary.json`
+    } else if (file === 'report.json') {
       newFilename = `${jstTimestamp}_summary.json`
     } else {
       newFilename = `${jstTimestamp}${fileExtension}`
@@ -69,7 +83,9 @@ function renameAndProcessReports() {
     // 同じ名前のファイルが既に存在する場合、ユニークな名前を生成
     let counter = 1
     while (fs.existsSync(newPath)) {
-      if (file === 'report.json') {
+      if (file === 'manifest.json') {
+        newFilename = `${jstTimestamp}_manifest_${counter}.json`
+      } else if (file === 'report.json') {
         newFilename = `${jstTimestamp}_summary_${counter}.json`
       } else {
         newFilename = `${jstTimestamp}_${counter}${fileExtension}`
@@ -78,9 +94,11 @@ function renameAndProcessReports() {
       counter++
     }
 
+    // ファイルをリネーム
     fs.renameSync(oldPath, newPath)
     console.log(`Renamed ${file} to ${newFilename}`)
 
+    // HTMLファイルの場合、生成日時情報を追加
     if (fileExtension === '.html') {
       let content = fs.readFileSync(newPath, 'utf8')
       const currentJST = formatDateForDisplay(jstDate)
@@ -95,6 +113,26 @@ function renameAndProcessReports() {
       console.log(
         `Updated ${newFilename} with current date/time information: ${currentJST}`
       )
+    }
+
+    // manifestファイルの処理
+    if (file === 'manifest.json') {
+      const content = JSON.parse(fs.readFileSync(newPath, 'utf8'))
+      content.forEach(item => {
+        // パスをファイル名のみに変更
+        item.htmlPath = path.basename(item.htmlPath)
+        item.jsonPath = path.basename(item.jsonPath)
+
+        // 新しいファイル名を生成
+        const newHtmlName = `${jstTimestamp}.html`
+        const newJsonName = `${jstTimestamp}.json`
+
+        // ファイル名を更新
+        item.htmlPath = newHtmlName
+        item.jsonPath = newJsonName
+      })
+      fs.writeFileSync(newPath, JSON.stringify(content, null, 2))
+      console.log(`Updated ${newFilename} with corrected paths and times`)
     }
   })
 }
@@ -139,7 +177,6 @@ function cleanupOldReports(cleanAll = false) {
 }
 
 // メイン関数
-
 function main() {
   const args = process.argv.slice(2)
   const command = args[0]
@@ -161,4 +198,5 @@ function main() {
   }
 }
 
+// スクリプトの実行
 main()

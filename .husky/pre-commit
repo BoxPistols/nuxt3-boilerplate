@@ -1,4 +1,3 @@
 npx lint-staged
 yarn prettier --write .
-node scripts/lighthouse-manager.js clean
 git add .
