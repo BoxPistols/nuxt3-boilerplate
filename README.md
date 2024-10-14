@@ -49,13 +49,13 @@ Checkout the [deployment documentation](https://nuxt.com/docs/getting-started/de
 
 ---
 
-# Lighthouse CI (LH CI)
+## Lighthouse CI (LH CI)
 
-## 概要
+### 概要
 
 Lighthouse CIを使用してウェブパフォーマンス、アクセシビリティ、SEO、ベストプラクティスを自動評価します。
 
-## 主要コマンド
+### 主要コマンド
 
 - 実行: `yarn lh`
 - 最新レポート表示: `yarn lh:view`
@@ -63,17 +63,17 @@ Lighthouse CIを使用してウェブパフォーマンス、アクセシビリ�
 - クリーンアップ: `yarn lh:clean`
 - 全削除: `yarn lh:cleanAll`
 
-## 設定ファイル
+### 設定ファイル
 
 - `.lighthouserc.cjs`: Lighthouse CI設定
 - `scripts/lighthouse-manager.js`: レポート管理スクリプト
 
-## 自動化
+### 自動化
 
 - Pre-commit hook: lint、format、クリーンアップ
 - GitHub Actions: PR時に自動実行
 
-## トラブルシューティング
+### トラブルシューティング
 
 1. `lighthouse-results`ディレクトリ確認
 2. Node.js v18.x以上確認
@@ -82,6 +82,6 @@ Lighthouse CIを使用してウェブパフォーマンス、アクセシビリ�
 
 問題が続く場合はイシュー作成してください。
 
-## 貢献
+### 貢献
 
 変更時は必ずテストし、レビューを依頼してください。

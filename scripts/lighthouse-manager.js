@@ -1,4 +1,3 @@
-// lighthouse-manager.js
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
@@ -7,46 +6,84 @@ const RESULTS_DIR = './lighthouse-results'
 const cmd = process.platform === 'win32' ? 'start' : 'open'
 const MAX_AGE_DAYS = 30
 
-// ファイル名にタイムスタンプを追加する関数
-function getCurrentJSTTimestamp(forFilename = false) {
-  const now = new Date()
-  const jstDate = new Date(
-    now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
-  )
-
-  if (forFilename) {
-    const pad = num => num.toString().padStart(2, '0')
-    return `${jstDate.getFullYear()}_${pad(jstDate.getMonth() + 1)}_${pad(jstDate.getDate())}_${pad(jstDate.getHours())}_${pad(jstDate.getMinutes())}_${pad(jstDate.getSeconds())}_${pad(jstDate.getMilliseconds(), 3)}`
-  } else {
-    return jstDate
-      .toLocaleString('ja-JP', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      })
-      .replace(/\//g, '-')
-  }
+function getJSTDate(date) {
+  return new Date(date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }))
 }
 
-// レポートをリネームして処理する関数
+function formatDateForFilename(date) {
+  const year = date.getFullYear().toString().slice(2)
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const hour = date.getHours().toString().padStart(2, '0')
+  const minute = date.getMinutes().toString().padStart(2, '0')
+  const second = date.getSeconds().toString().padStart(2, '0')
+
+  return `lh_${year}-${month}${day}-${hour}${minute}-${second}`
+}
+
+function formatDateForDisplay(date) {
+  return date
+    .toLocaleString('ja-JP', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Tokyo',
+    })
+    .replace(/\//g, '-')
+}
+
+function isNewFile(file) {
+  return file.startsWith('lighthouse-') || file === 'report.json'
+}
+
 function renameAndProcessReports() {
   const files = fs.readdirSync(RESULTS_DIR)
-  files.forEach(file => {
-    if (file.endsWith('.html')) {
-      const oldPath = path.join(RESULTS_DIR, file)
-      const jstTimestamp = getCurrentJSTTimestamp(true)
-      const newFilename = `lighthouse-${jstTimestamp}-report.html`
-      const newPath = path.join(RESULTS_DIR, newFilename)
+  const newFiles = files.filter(isNewFile)
 
-      fs.renameSync(oldPath, newPath)
-      console.log(`Renamed ${file} to ${newFilename}`)
+  if (newFiles.length === 0) {
+    console.log('No new Lighthouse reports found.')
+    return
+  }
 
+  const currentTime = new Date()
+  const jstDate = getJSTDate(currentTime)
+  const jstTimestamp = formatDateForFilename(jstDate)
+
+  newFiles.forEach(file => {
+    const oldPath = path.join(RESULTS_DIR, file)
+    const fileExtension = path.extname(file)
+    let newFilename
+
+    if (file === 'report.json') {
+      newFilename = `${jstTimestamp}_summary.json`
+    } else {
+      newFilename = `${jstTimestamp}${fileExtension}`
+    }
+
+    let newPath = path.join(RESULTS_DIR, newFilename)
+
+    // 同じ名前のファイルが既に存在する場合、ユニークな名前を生成
+    let counter = 1
+    while (fs.existsSync(newPath)) {
+      if (file === 'report.json') {
+        newFilename = `${jstTimestamp}_summary_${counter}.json`
+      } else {
+        newFilename = `${jstTimestamp}_${counter}${fileExtension}`
+      }
+      newPath = path.join(RESULTS_DIR, newFilename)
+      counter++
+    }
+
+    fs.renameSync(oldPath, newPath)
+    console.log(`Renamed ${file} to ${newFilename}`)
+
+    if (fileExtension === '.html') {
       let content = fs.readFileSync(newPath, 'utf8')
-      const currentJST = getCurrentJSTTimestamp()
+      const currentJST = formatDateForDisplay(jstDate)
       const infoDiv = `
         <div id="lh-info" style="background-color: #f0f0f0; padding: 10px; text-align: center; font-family: Arial, sans-serif;">
           <strong>Report generated (JST):</strong> ${currentJST}
@@ -102,6 +139,7 @@ function cleanupOldReports(cleanAll = false) {
 }
 
 // メイン関数
+
 function main() {
   const args = process.argv.slice(2)
   const command = args[0]
