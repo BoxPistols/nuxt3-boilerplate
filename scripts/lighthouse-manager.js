@@ -7,6 +7,7 @@ const RESULTS_DIR = './lighthouse-results'
 const cmd = process.platform === 'win32' ? 'start' : 'open'
 const MAX_AGE_DAYS = 30
 
+// ファイル名にタイムスタンプを追加する関数
 function getCurrentJSTTimestamp(forFilename = false) {
   const now = new Date()
   const jstDate = new Date(
@@ -31,6 +32,7 @@ function getCurrentJSTTimestamp(forFilename = false) {
   }
 }
 
+// レポートをリネームして処理する関数
 function renameAndProcessReports() {
   const files = fs.readdirSync(RESULTS_DIR)
   files.forEach(file => {
@@ -60,6 +62,7 @@ function renameAndProcessReports() {
   })
 }
 
+// レポートを開く関数
 function openReports(maxCount) {
   const htmlFiles = fs
     .readdirSync(RESULTS_DIR)
@@ -83,6 +86,7 @@ function openReports(maxCount) {
   }
 }
 
+// 古いレポートを削除する関数
 function cleanupOldReports(cleanAll = false) {
   const now = Date.now()
   const files = fs.readdirSync(RESULTS_DIR)
@@ -97,6 +101,7 @@ function cleanupOldReports(cleanAll = false) {
   })
 }
 
+// メイン関数
 function main() {
   const args = process.argv.slice(2)
   const command = args[0]
