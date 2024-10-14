@@ -12,15 +12,12 @@
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
-    "lh": "yarn build && lhci autorun && yarn lh:process && yarn lh:rename && yarn lh:view",
-    "lh:process": "node scripts/process-lighthouse-reports.js",
-    "lh:rename": "node scripts/rename-lighthouse-reports.js",
-    "lh:view": "node scripts/open-lighthouse-reports.js 1",
-    "lh:view:recent": "node scripts/open-lighthouse-reports.js 5 7",
-    "lh:view:all": "node scripts/open-lighthouse-reports.js 12",
-    "lh:clean": "node scripts/cleanup-lighthouse-reports.js",
-    "lh:cleanAll": "node scripts/cleanup-lighthouse-reports.js cleanAll",
-    "ci": "yarn build && yarn lh:clean && yarn lh && yarn lh:view",
+    "lh": "yarn build && lhci autorun && node scripts/lighthouse-manager.js rename-and-process && node scripts/lighthouse-manager.js open",
+    "lh:view": "node scripts/lighthouse-manager.js open 1",
+    "lh:view:all": "node scripts/lighthouse-manager.js open 12",
+    "lh:clean": "node scripts/lighthouse-manager.js clean",
+    "lh:cleanAll": "node scripts/lighthouse-manager.js clean all",
+    "ci": "yarn build && yarn lh:clean && yarn lh",
     "fix": "yarn lint:fix && yarn format",
     "prepare": "husky install"
   },
@@ -74,6 +71,8 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{css,scss,json,md}": "prettier --write"
+    "*.{js,ts,vue,css,scss,json,md}": [
+      "prettier --write"
+    ]
   }
 }
