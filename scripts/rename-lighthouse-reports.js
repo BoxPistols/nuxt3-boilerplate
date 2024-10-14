@@ -20,18 +20,34 @@ function getCurrentJSTTimestamp() {
   const day = pad(jstDate.getDate())
   const hours = pad(jstDate.getHours())
   const minutes = pad(jstDate.getMinutes())
-  const seconds = pad(jstDate.getSeconds())
+  // const seconds = pad(jstDate.getSeconds())
+  // const milliseconds = pad(jstDate.getMilliseconds(), 3) // ミリ秒を追加
 
-  return `${year}_${month}_${day}_${hours}_${minutes}_${seconds}`
+  // ファイル名にミリ秒を含めることでユニークな名前にする
+  return `${year}_${month}_${day}_${hours}_${minutes}`
 }
 
 function renameFile(file) {
   const filePath = path.join(RESULTS_DIR, file)
 
   if (file.endsWith('.html')) {
-    // JSTタイムスタンプを取得
+    // JSTのタイムスタンプを取得（ミリ秒を含む）
     const jstTimestamp = getCurrentJSTTimestamp()
     const newFilename = `lighthouse-${jstTimestamp}-report.html`
+    const newFilePath = path.join(RESULTS_DIR, newFilename)
+
+    if (filePath !== newFilePath) {
+      fs.renameSync(filePath, newFilePath)
+      console.log(`Renamed ${file} to ${newFilename}`)
+      return newFilename
+    }
+    console.log(`File ${file} already has the correct name`)
+    return file
+  }
+  // jsonも同様に処理
+  if (file.endsWith('.json')) {
+    const jstTimestamp = getCurrentJSTTimestamp()
+    const newFilename = `lighthouse-${jstTimestamp}-report.json`
     const newFilePath = path.join(RESULTS_DIR, newFilename)
 
     if (filePath !== newFilePath) {

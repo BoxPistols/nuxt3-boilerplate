@@ -44,8 +44,8 @@ module.exports = {
       },
     },
     upload: {
-      // target: 'filesystem',
-      target: 'temporary-public-storage', // CIでは一時的なストレージにアップロード
+      target: 'filesystem',
+      // target: 'temporary-public-storage', // 一時的なストレージにアップロード
       outputDir: './lighthouse-results',
       reportFilenamePattern:
         'lighthouse-%%DATETIME%%-%%PATHNAME%%-report.%%EXTENSION%%',
