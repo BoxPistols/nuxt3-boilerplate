@@ -1,2 +1,3 @@
-lint-staged && yarn prettier --write . && git add . && node scripts/cleanup-lighthouse-reports.js
+npx lint-staged
+yarn prettier --write .
 git add .
