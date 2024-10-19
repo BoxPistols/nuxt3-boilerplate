@@ -4,7 +4,8 @@ const path = require('node:path')
 const isWindows = os.platform() === 'win32'
 const isWSL = os.release().toLowerCase().includes('microsoft')
 
-const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
+// const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
+const BASE_URL = 'http://localhost:3000'
 
 /** @type {import('@lhci/cli').Config} */
 module.exports = {
