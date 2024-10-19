@@ -76,6 +76,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
   },
+  ssr: true,
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',
