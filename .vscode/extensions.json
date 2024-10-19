@@ -5,7 +5,8 @@
     "davidanson.vscode-markdownlint",
     "usernamehw.errorlens",
     "wayou.vscode-todo-highlight",
-    "gruntfuggly.todo-tree"
+    "gruntfuggly.todo-tree",
+    "shakram02.bash-beautify"
   ]
   // VS拡張に @recommended を入力すると、おすすめの拡張機能が表示されます。
 }
