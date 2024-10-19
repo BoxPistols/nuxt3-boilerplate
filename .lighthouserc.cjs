@@ -9,29 +9,36 @@ const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
 /** @type {import('@lhci/cli').Config} */
 module.exports = {
   ci: {
+    // collect: {
+    //   url: [`${BASE_URL}/`],
+    //   startServerCommand: 'node .output/server/index.mjs',
+    //   startServerReadyPattern: 'Listening on',
+    //   maxWaitForLoad: 60000,
+    //   numberOfRuns: 1,
+    //   settings: {
+    //     chromeFlags: [
+    //       '--no-sandbox',
+    //       '--headless=new',
+    //       '--disable-gpu',
+    //       '--disable-dev-shm-usage',
+    //       '--disable-software-rasterizer',
+    //       '--disable-extensions',
+    //     ],
+    //     locale: 'ja', // 日本語設定
+    //     onlyCategories: [
+    //       'performance',
+    //       'accessibility',
+    //       'best-practices',
+    //       'seo',
+    //     ],
+    //   },
+    // },
     collect: {
-      url: [`${BASE_URL}/`],
+      url: ['http://localhost:3000'],
       startServerCommand: 'node .output/server/index.mjs',
-      startServerReadyPattern: 'Listening on',
-      maxWaitForLoad: 60000,
+      startServerReadyPattern: 'Listening',
+      startServerTimeout: 60000,
       numberOfRuns: 1,
-      settings: {
-        chromeFlags: [
-          '--no-sandbox',
-          '--headless=new',
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--disable-software-rasterizer',
-          '--disable-extensions',
-        ],
-        locale: 'ja', // 日本語設定
-        onlyCategories: [
-          'performance',
-          'accessibility',
-          'best-practices',
-          'seo',
-        ],
-      },
     },
     assert: {
       assertions: {
