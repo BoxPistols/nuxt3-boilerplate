@@ -18,10 +18,10 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
-  routeRules: {},
+  trailingSlash: false, // trueにするとURLにスラッシュが付与される
 
   app: {
+    baseURL: '/',
     head: {
       htmlAttrs: {
         lang: 'ja',
@@ -76,6 +76,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
   },
+  ssr: true, // SSRモードを利用する場合
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',
