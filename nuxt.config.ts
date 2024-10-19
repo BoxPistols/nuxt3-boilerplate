@@ -1,5 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
-
 import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
@@ -18,15 +16,15 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
-  routeRules: {},
+  trailingSlash: false,
 
   app: {
+    baseURL: '/',
     head: {
       htmlAttrs: {
         lang: 'ja',
       },
-      title: 'My Awesome App', // サイトのタイトル
+      title: 'My Awesome App',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -35,7 +33,6 @@ export default defineNuxtConfig({
           name: 'description',
           content: 'My Awesome App description',
         },
-        // Open Graph Meta Tags
         { hid: 'og:type', property: 'og:type', content: 'website' },
         {
           hid: 'og:site_name',
@@ -55,14 +52,12 @@ export default defineNuxtConfig({
             'https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg?auto=compress&cs=tinysrgb&w=800',
         },
         { hid: 'og:url', property: 'og:url', content: 'https://example.com' },
-        // Twitter Card
         {
           hid: 'twitter:card',
           name: 'twitter:card',
           content: 'summary_large_image',
         },
         { hid: 'twitter:site', name: 'twitter:site', content: '@username' },
-        // twitter image
         {
           hid: 'twitter:image',
           name: 'twitter:image',
@@ -74,8 +69,9 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    preset: 'node-server',
+    preset: 'static',
   },
+  ssr: false,
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',

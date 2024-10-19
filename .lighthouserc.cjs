@@ -10,8 +10,11 @@ const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
 module.exports = {
   ci: {
     collect: {
-      url: [`${BASE_URL}/`],
-      startServerCommand: 'node .output/server/index.mjs',
+      staticDistDir: '.output/public',
+      url: ['http://localhost:3000'],
+      // url: [`${BASE_URL}/`],
+      startServerCommand: 'npx serve -p 3000 .output/public',
+      // startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
       maxWaitForLoad: 60000,
       numberOfRuns: 1,

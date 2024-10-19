@@ -1,15 +1,15 @@
-<script setup lang="ts">
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-</script>
-
+<!-- pages/index.vue -->
 <template>
-  <div>
-    <h1>Nuxt Routing set up successfully!</h1>
-    <p>Current route: {{ route.path }}</p>
-    <a href="https://nuxt.com/docs/getting-started/routing" target="_blank">
-      Learn more about Nuxt Routing
-    </a>
+  <div class="flex flex-col">
+    <div class="container mx-auto px-4">
+      <h1 class="text-2xl font-bold mb-4">Welcome to My Tech Site</h1>
+    </div>
   </div>
 </template>
+
+<style scoped>
+header,
+footer {
+  backdrop-filter: blur(10px);
+}
+</style>

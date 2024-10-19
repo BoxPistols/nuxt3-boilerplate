@@ -139,6 +139,10 @@ function renameAndProcessReports() {
 
 // レポートを開く関数
 function openReports(maxCount) {
+  if (process.env.CI) {
+    console.log('Skipping report opening in CI environment')
+    return
+  }
   const htmlFiles = fs
     .readdirSync(RESULTS_DIR)
     .filter(file => file.endsWith('.html'))
