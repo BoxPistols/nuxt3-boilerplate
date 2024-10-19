@@ -73,10 +73,9 @@ export default defineNuxtConfig({
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
   },
-  // nitro: {
-  //   preset: 'node-server',
-  // },
-  // ssr: true,
+  nitro: {
+    preset: 'node-server',
+  },
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',
