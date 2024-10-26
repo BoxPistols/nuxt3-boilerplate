@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # 権限設定: chmod +x shells/milestone_linux.sh
+
 # 実行方法: ./shells/milestone_linux.sh
 
-# 必要なコマンドがインストールされているか確認
-# 入っていなければ $ sudo apt install jq / gh = https://cli.github.com/
+# 入っていなければ
+# jq https://stedolan.github.io/jq/download/
+# gh https://cli.github.com/
 
 # ページャを無効化
 export PAGER=cat
@@ -215,7 +217,8 @@ main() {
       if [ "$naming_choice" == "2" ]; then
         title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
       else
-        title="$formatted_date $day_name W$week_number"
+        # title="$formatted_date $day_name W$week_number"
+        title="$formatted_date W$week_number"
       fi
 
       description="期間: $current_date から $sprint_end (${day_name}曜日)"
