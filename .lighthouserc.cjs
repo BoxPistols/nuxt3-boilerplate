@@ -1,10 +1,24 @@
 const os = require('node:os')
 const path = require('node:path')
 
+// WSL2環境かどうかを判定
 const isWindows = os.platform() === 'win32'
 const isWSL = os.release().toLowerCase().includes('microsoft')
 
+// WSL2環境ではos.tmpdir()を上書きして'/tmp'を返す
+if (isWSL) {
+  os.tmpdir = () => '/tmp'
+}
+
+// 一時ディレクトリの設定
+const tmpDir = os.tmpdir()
+
 const BASE_URL = process.env.LIGHTHOUSE_BASE_URL || 'http://localhost:3000'
+
+// パス名をサニタイズする関数
+function sanitizePathname(pathname) {
+  return pathname.replace(/[<>:"/\\|?*]/g, '_').replace(/\//g, '_') // ファイル名に使用できない文字をアンダースコアに置換
+}
 
 /** @type {import('@lhci/cli').Config} */
 module.exports = {
@@ -12,9 +26,7 @@ module.exports = {
     collect: {
       staticDistDir: '.output/public',
       url: ['http://localhost:3000'],
-      // url: [`${BASE_URL}/`],
       startServerCommand: 'npx serve -p 3000 .output/public',
-      // startServerCommand: 'node .output/server/index.mjs',
       startServerReadyPattern: 'Listening on',
       maxWaitForLoad: 60000,
       numberOfRuns: 1,
@@ -47,14 +59,15 @@ module.exports = {
       },
     },
     upload: {
-      // target: 'temporary-public-storage', // 一時的なストレージにアップロード
       target: 'filesystem',
       outputDir: './lighthouse-results',
       reportFilenamePattern:
-        'lighthouse-%%DATETIME%%-%%PATHNAME%%-report.%%EXTENSION%%',
+        'lighthouse-%%DATETIME%%-' +
+        sanitizePathname('%%PATHNAME%%') +
+        '-report.%%EXTENSION%%',
     },
   },
-  cachePath: path.join(os.tmpdir(), '.lighthouse'),
+  cachePath: path.join(tmpDir, '.lighthouse'),
 }
 
 if (isWindows || isWSL) {

@@ -1,12 +1,41 @@
+#!/usr/bin/env node
+
 // 必要なモジュールをインポート
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
+import os from 'node:os'
+
+// WSL2環境かどうかを判定
+const isWindows = os.platform() === 'win32'
+const isWSL = os.release().toLowerCase().includes('microsoft')
+
+// WSL2環境ではos.tmpdir()を上書きして'/tmp'を返す
+if (isWSL) {
+  os.tmpdir = () => '/tmp'
+}
 
 // 定数の定義
 const RESULTS_DIR = './lighthouse-results' // Lighthouseの結果を保存するディレクトリ
-const cmd = process.platform === 'win32' ? 'start' : 'open' // OSに応じてファイルを開くコマンドを設定
-const MAX_AGE_DAYS = 30 // レポートの最大保持日数
+
+// OSに応じてファイルを開くコマンドを設定
+let cmd
+if (isWindows) {
+  cmd = 'start'
+} else if (process.platform === 'darwin') {
+  cmd = 'open'
+} else if (process.platform === 'linux') {
+  if (isWSL) {
+    cmd = 'wslview' // WSL2でWindowsの既定のアプリケーションを使用
+  } else {
+    cmd = 'xdg-open'
+  }
+} else {
+  cmd = 'open' // デフォルトでMacのコマンドを使用
+}
+
+// レポートの最大保持日数
+const MAX_AGE_DAYS = 30
 
 // 日本標準時（JST）の日付を取得する関数
 function getJSTDate(date) {
@@ -52,11 +81,16 @@ function isNewFile(file) {
 
 // レポートのリネームと処理を行う主要な関数
 function renameAndProcessReports() {
+  if (!fs.existsSync(RESULTS_DIR)) {
+    console.log('結果ディレクトリが存在しません。')
+    return
+  }
+
   const files = fs.readdirSync(RESULTS_DIR) // 結果ディレクトリ内のファイルを取得
   const newFiles = files.filter(isNewFile) // 新しいファイルのみをフィルタリング
 
   if (newFiles.length === 0) {
-    console.log('No new Lighthouse reports found.')
+    console.log('新しいLighthouseレポートが見つかりませんでした。')
     return
   }
 
@@ -71,7 +105,7 @@ function renameAndProcessReports() {
 
     // ファイルタイプに応じて新しいファイル名を決定
     if (file === 'manifest.json') {
-      newFilename = `${jstTimestamp}_summary.json`
+      newFilename = `${jstTimestamp}_manifest.json`
     } else if (file === 'report.json') {
       newFilename = `${jstTimestamp}_summary.json`
     } else {
@@ -109,7 +143,7 @@ function renameAndProcessReports() {
       `
       content = content.replace(/<div id="lh-info".*?<\/div>/s, '')
       content = content.replace('<body>', `<body>${infoDiv}`)
-      fs.writeFileSync(newPath, content)
+      fs.writeFileSync(newPath, content, 'utf8')
       console.log(
         `Updated ${newFilename} with current date/time information: ${currentJST}`
       )
@@ -131,18 +165,36 @@ function renameAndProcessReports() {
         item.htmlPath = newHtmlName
         item.jsonPath = newJsonName
       })
-      fs.writeFileSync(newPath, JSON.stringify(content, null, 2))
+      fs.writeFileSync(newPath, JSON.stringify(content, null, 2), 'utf8')
       console.log(`Updated ${newFilename} with corrected paths and times`)
     }
   })
 }
 
+// 不要なディレクトリを削除する関数
+function cleanupUnwantedDirectories() {
+  if (isWSL) {
+    const unwantedDirs = fs
+      .readdirSync('.')
+      .filter(dir => dir.startsWith('C:\\Users\\'))
+    unwantedDirs.forEach(dir => {
+      fs.rmSync(dir, { recursive: true, force: true })
+      console.log(`Deleted unwanted directory: ${dir}`)
+    })
+  }
+}
+
 // レポートを開く関数
 function openReports(maxCount) {
   if (process.env.CI) {
-    console.log('Skipping report opening in CI environment')
+    console.log('CI環境ではレポートの自動オープンをスキップします。')
     return
   }
+  if (!fs.existsSync(RESULTS_DIR)) {
+    console.log('結果ディレクトリが存在しません。')
+    return
+  }
+
   const htmlFiles = fs
     .readdirSync(RESULTS_DIR)
     .filter(file => file.endsWith('.html'))
@@ -151,10 +203,11 @@ function openReports(maxCount) {
     .slice(0, maxCount)
 
   if (htmlFiles.length === 0) {
-    console.log('No HTML reports found.')
+    console.log('HTMLレポートが見つかりません。')
   } else {
     htmlFiles.forEach(file => {
-      exec(`${cmd} "${file}"`, error => {
+      const execCommand = `${cmd} "${file}"`
+      exec(execCommand, error => {
         if (error) {
           console.error(`Error opening ${path.basename(file)}:`, error)
         } else {
@@ -167,7 +220,7 @@ function openReports(maxCount) {
 
 // 古いレポートを削除する関数
 function cleanupOldReports(cleanAll = false) {
-  if (!fs.existsSync(path)) {
+  if (!fs.existsSync(RESULTS_DIR)) {
     console.log('ディレクトリが存在しません。クリーンアップをスキップします。')
     return
   }
@@ -192,6 +245,7 @@ function main() {
   switch (command) {
     case 'rename-and-process':
       renameAndProcessReports()
+      cleanupUnwantedDirectories() // 不要なディレクトリを削除
       break
     case 'open':
       openReports(parseInt(args[1]) || 1)

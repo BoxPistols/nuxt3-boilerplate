@@ -30,5 +30,7 @@
   "vetur.format.defaultFormatter.html": "prettier",
   "vetur.format.defaultFormatter.js": "prettier",
   "vetur.format.defaultFormatter.css": "prettier",
-  "vetur.format.defaultFormatter.scss": "prettier"
+  "vetur.format.defaultFormatter.scss": "prettier",
+  "workbench.tree.stickyScrollMaxItemCount": 5,
+  "editor.stickyScroll.maxLineCount": 5
 }

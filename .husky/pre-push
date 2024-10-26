@@ -1,1 +1,2 @@
 yarn ci
+./shells/cleanup-unwanted-files.sh

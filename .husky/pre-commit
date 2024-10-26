@@ -1,3 +1,6 @@
+# chmod +x ./shells/cleanup-unwanted-files.sh
+./shells/cleanup-unwanted-files.sh
+
 npx lint-staged
 yarn prettier --write .
 git add .

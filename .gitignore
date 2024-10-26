@@ -103,5 +103,13 @@ sw.*
 .lighthouseci/
 lighthouse-results/*.html
 lighthouse-results/*.json
+./lighthouse-results/**/*.*
+
 # !lighthouse-results/manifest.json
 lighthouse-results/manifest.json
+google-chrome-stable_current_amd64.deb
+
+# 不要なLighthouseキャッシュディレクトリを無視
+C:\Users\*/AppData/Local/lighthouse.*
+C:\\*
+C:\Users\*\AppData\Local\Google\Chrome\User Data\Default\Local Storage\leveldb
