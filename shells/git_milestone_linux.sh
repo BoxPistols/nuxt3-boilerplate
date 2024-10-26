@@ -1,6 +1,6 @@
 #!/bin/bash
 
-<<<<<<<< HEAD:shells/milestone_mac.sh
+<:shells/milestone_mac.sh
 # 初回権限 chmod +x shells/milestone_mac.sh
 # 実行 ./shells/milestone_mac.sh.sh
 # 入っていなければ 
@@ -58,7 +58,7 @@ create_or_update_milestone() {
   fi
 }
 
-<<<<<<<< HEAD:shells/milestone_mac.sh
+<:shells/milestone_mac.sh
 delete_selected_milestones() {
   local username="$1"
   local repo="$2"
