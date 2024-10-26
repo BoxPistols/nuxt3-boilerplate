@@ -3,10 +3,14 @@
 # 権限設定: chmod +x shells/milestone_linux.sh
 # 実行方法: ./shells/milestone_linux.sh
 
+# 必要なコマンドがインストールされているか確認
 # 入っていなければ $ sudo apt install jq / gh = https://cli.github.com/
 
 # ページャを無効化
 export PAGER=cat
+
+# エラー時にスクリプトを終了し、デバッグ情報を表示
+set -e
 
 # GitHub API関数
 github_api() {
@@ -40,9 +44,10 @@ create_or_update_milestone() {
 
     local milestone_number=$(echo "$existing_milestone" | jq -r '.number')
 
-    # due_on を ISO 8601 形式に変換
-    custom_time=${custom_time:-13:00:00}
-    due_on_iso=$(date -d "${due_date}T${custom_time}" -u +"%Y-%m-%dT%H:%M:%SZ")
+    # due_on を ISO 8601 形式に変換（UTCに変換）
+    custom_time=${custom_time:-17:00:00}
+    due_on_iso=$(TZ=Asia/Tokyo date -d "$due_date $custom_time" -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "due_on_iso: $due_on_iso"
 
     output=$(github_api PATCH "/repos/$username/$repo/milestones/$milestone_number" \
       -f title="$title" \
@@ -51,15 +56,16 @@ create_or_update_milestone() {
     status=$?
 
     if [ $status -eq 0 ]; then
-      echo "更新: $title (終了: $due_date ${custom_time})"
+      echo "更新: $title (終了: $due_date $custom_time)"
     else
       echo "エラー: $title の更新に失敗"
       echo "詳細: $output"
     fi
   else
-    # due_on を ISO 8601 形式に変換
-    custom_time=${custom_time:-13:00:00}
-    due_on_iso=$(date -d "${due_date}T${custom_time}" -u +"%Y-%m-%dT%H:%M:%SZ")
+    # due_on を ISO 8601 形式に変換（UTCに変換）
+    custom_time=${custom_time:-17:00:00}
+    due_on_iso=$(TZ=Asia/Tokyo date -d "$due_date $custom_time" -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "due_on_iso: $due_on_iso"
 
     output=$(github_api POST "/repos/$username/$repo/milestones" \
       -f title="$title" \
@@ -68,7 +74,7 @@ create_or_update_milestone() {
     status=$?
 
     if [ $status -eq 0 ]; then
-      echo "作成: $title (終了: $due_date ${custom_time})"
+      echo "作成: $title (終了: $due_date $custom_time)"
     else
       echo "エラー: $title の作成に失敗"
       echo "詳細: $output"
@@ -115,7 +121,7 @@ list_milestones() {
   done
 }
 
-# 日付操作関数（Linux向けに変更）
+# 日付操作関数
 add_days() {
   date -d "$1 +$2 days" +%Y-%m-%d
 }
@@ -171,9 +177,14 @@ main() {
     read -r -e sprint_end_day
     echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
     read -r -e sprint_cycle
-    echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは13:00):"
+    echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは17:00):"
     read -r -e custom_time
-    custom_time=${custom_time:-13:00}
+    custom_time=${custom_time:-17:00}
+
+    # custom_time を "HH:MM:SS" 形式にする
+    if [[ ! $custom_time =~ :[0-9]{2}$ ]]; then
+      custom_time="${custom_time}:00"
+    fi
 
     echo "マイルストーンの命名ルールを選択してください:"
     echo "1) デフォルト (YY-MM-DD 曜日 W週番号)"
