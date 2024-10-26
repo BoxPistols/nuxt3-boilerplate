@@ -215,7 +215,8 @@ main() {
       if [ "$naming_choice" == "2" ]; then
         title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
       else
-        title="$formatted_date $day_name W$week_number"
+        # title="$formatted_date $day_name W$week_number"
+        title="$formatted_date W$week_number"
       fi
 
       description="期間: $current_date から $sprint_end (${day_name}曜日)"
