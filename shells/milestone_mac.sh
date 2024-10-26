@@ -1,14 +1,29 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:shells/milestone_mac.sh
+=======
+<<<<<<<< HEAD:shells/git_milestone_linux.sh
+<<<<<<<< HEAD:shells/milestone_mac.sh
+========
+>>>>>>>> e1ef44e (base moved):shells/milestone_mac.sh
+>>>>>>> e1ef44e (base moved)
 # 初回権限 chmod +x shells/milestone_mac.sh
 # 実行 ./shells/milestone_mac.sh.sh
 # 入っていなければ 
 #  jq https://stedolan.github.io/jq/download/
 #　gh https://cli.github.com/
 
+<<<<<<< HEAD
 ========
 >>>>>>>> 945d39e (Re Shell for Linux):shells/git_milestone_linux.sh
+=======
+<<<<<<<< HEAD:shells/git_milestone_linux.sh
+========
+>>>>>>>> 945d39e (Re Shell for Linux):shells/git_milestone_linux.sh
+========
+>>>>>>>> e1ef44e (base moved):shells/milestone_mac.sh
+>>>>>>> e1ef44e (base moved)
 # GitHub API関数
 github_api() {
   local method="$1"
@@ -25,10 +40,13 @@ create_or_update_milestone() {
   local due_date="$4"
   local description="$5"
 
+<<<<<<< HEAD
   # 日本時間に調整（9時間追加） for Linux
   local adjusted_time=$(date -d "+9 hours" -u +"%H:%M")
 
   # マイルストーンを取得
+=======
+>>>>>>> e1ef44e (base moved)
   local existing_milestone=$(github_api GET "/repos/$username/$repo/milestones" -q ".[] | select(.title == \"$title\")")
 
   if [ -n "$existing_milestone" ]; then
@@ -44,21 +62,38 @@ create_or_update_milestone() {
     fi
 
     local milestone_number=$(echo "$existing_milestone" | jq -r '.number')
+<<<<<<< HEAD
     if github_api PATCH "/repos/$username/$repo/milestones/$milestone_number" -f title="$title" -f due_on="${due_date}T${adjusted_time}:00Z" -f description="$description"; then
       echo "更新: $title (終了: $due_date ${adjusted_time} JST)"
+=======
+    if github_api PATCH "/repos/$username/$repo/milestones/$milestone_number" -f title="$title" -f due_on="${due_date}T${custom_time}:00Z" -f description="$description"; then
+      echo "更新: $title (終了: $due_date ${custom_time})"
+>>>>>>> e1ef44e (base moved)
     else
       echo "エラー: $title の更新に失敗"
     fi
   else
+<<<<<<< HEAD
     if github_api POST "/repos/$username/$repo/milestones" -f title="$title" -f due_on="${due_date}T${adjusted_time}:00Z" -f description="$description"; then
       echo "作成: $title (終了: $due_date ${adjusted_time} JST)"
+=======
+    if github_api POST "/repos/$username/$repo/milestones" -f title="$title" -f due_on="${due_date}T${custom_time}:00Z" -f description="$description"; then
+      echo "作成: $title (終了: $due_date ${custom_time})"
+>>>>>>> e1ef44e (base moved)
     else
       echo "エラー: $title の作成に失敗"
     fi
   fi
 }
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:shells/milestone_mac.sh
+=======
+<<<<<<<< HEAD:shells/git_milestone_linux.sh
+<<<<<<<< HEAD:shells/milestone_mac.sh
+========
+>>>>>>>> e1ef44e (base moved):shells/milestone_mac.sh
+>>>>>>> e1ef44e (base moved)
 delete_selected_milestones() {
   local username="$1"
   local repo="$2"
@@ -84,6 +119,7 @@ list_milestones() {
 }
 
 # 日付操作関数
+<<<<<<< HEAD
 ========
 # 日付操作関数 for Linux
 >>>>>>>> 945d39e (Re Shell for Linux):shells/git_milestone_linux.sh
@@ -106,6 +142,46 @@ format_date() {
 # 以下の処理はそのままでOK
 main() {
   # メイン処理
+=======
+<<<<<<<< HEAD:shells/git_milestone_linux.sh
+========
+# 日付操作関数 for Linux
+>>>>>>>> 945d39e (Re Shell for Linux):shells/git_milestone_linux.sh
+========
+>>>>>>>> e1ef44e (base moved):shells/milestone_mac.sh
+add_days() {
+  date -j -v+"$2"d -f "%Y-%m-%d" "$1" +%Y-%m-%d
+}
+
+get_next_day_of_week() {
+  local current_date=$1
+  local target_day=$2
+  local day_diff=$(((target_day - $(date -j -f "%Y-%m-%d" "$current_date" +%u) + 7) % 7))
+  if [ $day_diff -eq 0 ]; then
+    day_diff=7
+  fi
+  date -j -v+"$day_diff"d -f "%Y-%m-%d" "$current_date" +%Y-%m-%d
+}
+
+get_week_number() {
+  date -j -f "%Y-%m-%d" "$1" +%V
+}
+
+get_year() {
+  date -j -f "%Y-%m-%d" "$1" +%Y
+}
+
+get_day_of_week() {
+  date -j -f "%Y-%m-%d" "$1" +%a
+}
+
+format_date() {
+  date -j -f "%Y-%m-%d" "$1" +%y-%m-%d
+}
+
+# メイン処理
+main() {
+>>>>>>> e1ef44e (base moved)
   echo "GitHubユーザー名/組織名:"
   read -r username
   echo "リポジトリ名:"
@@ -124,6 +200,7 @@ main() {
     read -r start_date
     echo "終了日 (YYYY-MM-DD):"
     read -r end_date
+<<<<<<< HEAD
     echo "スプリントの期間を選択してください:"
     echo "1) 7日間"
     echo "2) 14日間"
@@ -136,16 +213,27 @@ main() {
       sprint_days=7
       ;;
     esac
+=======
+    echo "スプリントの終了曜日を選択してください (月=1, 火=2, 水=3, 木=4, 金=5, 土=6, 日=7):"
+    read -r sprint_end_day
+    echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
+    read -r sprint_cycle
+>>>>>>> e1ef44e (base moved)
     echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは13:00):"
     read -r custom_time
     custom_time=${custom_time:-13:00}
 
     echo "マイルストーンの命名ルールを選択してください:"
+<<<<<<< HEAD
     echo "1) デフォルト (YYYY-MM-DD W週番号)"
+=======
+    echo "1) デフォルト (YY-MM-DD 曜日 W週番号)"
+>>>>>>> e1ef44e (base moved)
     echo "2) カスタム"
     read -r naming_choice
 
     if [ "$naming_choice" == "2" ]; then
+<<<<<<< HEAD
       echo "カスタム命名ルールを入力してください (使用可能な変数: {date}, {week}, {year}):"
       read -r custom_naming
     fi
@@ -156,10 +244,27 @@ main() {
       sprint_end=$(date -d "$current_date +$((sprint_days - 1)) days" +"%Y-%m-%d")
       if [[ "$(date -d "$sprint_end" +%s)" -gt "$(date -d "$end_date" +%s)" ]]; then
         sprint_end=$end_date
+=======
+      echo "カスタム命名ルールを入力してください (使用可能な変数: {date}, {day}, {week}, {year}):"
+      read -r custom_naming
+    fi
+
+    days=("月" "火" "水" "木" "金" "土" "日")
+    day_name=${days[$((sprint_end_day - 1))]}
+
+    overwrite_all=""
+    current_date=$start_date
+    while [[ "$(date -j -f "%Y-%m-%d" "$current_date" +%s)" -le "$(date -j -f "%Y-%m-%d" "$end_date" +%s)" ]]; do
+      sprint_end=$(get_next_day_of_week "$current_date" $sprint_end_day)
+      sprint_end=$(date -j -v+"$((sprint_cycle * 7 - 7))d" -f "%Y-%m-%d" "$sprint_end" +%Y-%m-%d)
+      if [[ "$(date -j -f "%Y-%m-%d" "$sprint_end" +%s)" -gt "$(date -j -f "%Y-%m-%d" "$end_date" +%s)" ]]; then
+        break
+>>>>>>> e1ef44e (base moved)
       fi
       week_number=$(get_week_number "$sprint_end")
       year=$(get_year "$sprint_end")
       formatted_date=$(format_date "$sprint_end")
+<<<<<<< HEAD
 
       if [ "$naming_choice" == "2" ]; then
         title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{week}/$week_number/g; s/{year}/$year/g")
@@ -168,6 +273,17 @@ main() {
       fi
 
       description="期間: $current_date から $sprint_end"
+=======
+      day_of_week=$(get_day_of_week "$sprint_end")
+
+      if [ "$naming_choice" == "2" ]; then
+        title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
+      else
+        title="$formatted_date $day_name W$week_number"
+      fi
+
+      description="期間: $current_date から $sprint_end (${day_name}曜日)"
+>>>>>>> e1ef44e (base moved)
 
       create_or_update_milestone "$username" "$repo" "$title" "$sprint_end" "$description"
 
