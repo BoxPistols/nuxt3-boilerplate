@@ -167,6 +167,10 @@ function openReports(maxCount) {
 
 // 古いレポートを削除する関数
 function cleanupOldReports(cleanAll = false) {
+  if (!fs.existsSync(path)) {
+    console.log('ディレクトリが存在しません。クリーンアップをスキップします。')
+    return
+  }
   const now = Date.now()
   const files = fs.readdirSync(RESULTS_DIR)
   files.forEach(file => {
