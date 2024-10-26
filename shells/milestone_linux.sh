@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # 権限設定: chmod +x shells/milestone_linux.sh
+
 # 実行方法: ./shells/milestone_linux.sh
 
-# 必要なコマンドがインストールされているか確認
-# 入っていなければ $ sudo apt install jq / gh = https://cli.github.com/
+# 入っていなければ
+# jq https://stedolan.github.io/jq/download/
+# gh https://cli.github.com/
 
 # ページャを無効化
 export PAGER=cat

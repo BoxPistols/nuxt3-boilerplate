@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # 初回権限 chmod +x shells/milestone_mac.sh
-# 実行 ./shells/milestone_mac.sh.sh
-# 入っていなければ 
-#  jq https://stedolan.github.io/jq/download/
-#　gh https://cli.github.com/
+
+# 実行 ./shells/milestone_mac.sh
+
+# 入っていなければ
+# jq https://stedolan.github.io/jq/download/
+# gh https://cli.github.com/
 
 # GitHub API関数
 github_api() {
@@ -75,6 +77,21 @@ list_milestones() {
   done
 }
 
+delete_all_milestones() {
+  local username="$1"
+  local repo="$2"
+  local milestones=$(github_api GET "/repos/$username/$repo/milestones?state=all")
+  local milestone_numbers=$(echo "$milestones" | jq -r '.[].number')
+
+  for number in $milestone_numbers; do
+    if github_api DELETE "/repos/$username/$repo/milestones/$number"; then
+      echo "マイルストーン #$number を削除しました。"
+    else
+      echo "エラー: マイルストーン #$number の削除に失敗しました。"
+    fi
+  done
+}
+
 # 日付操作関数
 add_days() {
   date -j -v+"$2"d -f "%Y-%m-%d" "$1" +%Y-%m-%d
@@ -130,9 +147,9 @@ main() {
     read -r sprint_end_day
     echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
     read -r sprint_cycle
-    echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは13:00):"
+    echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは17:00):"
     read -r custom_time
-    custom_time=${custom_time:-13:00}
+    custom_time=${custom_time:-17:00}
 
     echo "マイルストーンの命名ルールを選択してください:"
     echo "1) デフォルト (YY-MM-DD 曜日 W週番号)"
@@ -163,7 +180,8 @@ main() {
       if [ "$naming_choice" == "2" ]; then
         title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
       else
-        title="$formatted_date $day_name W$week_number"
+        # title="$formatted_date $day_name W$week_number"
+        title="$formatted_date W$week_number"
       fi
 
       description="期間: $current_date から $sprint_end (${day_name}曜日)"
