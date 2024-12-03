@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "test": "yarn lh",
-    "build": "yarn install && yarn build",
+    "test": "pnpm lh",
+    "build": "pnpm install && pnpm build",
     "launch": "npm run dev"
   }
 }

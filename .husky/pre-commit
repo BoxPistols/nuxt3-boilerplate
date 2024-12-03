@@ -1,6 +1,4 @@
-# chmod +x ./shells/cleanup-unwanted-files.sh
-./shells/cleanup-unwanted-files.sh
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
-yarn prettier --write .
-git add .
+pnpm fix
