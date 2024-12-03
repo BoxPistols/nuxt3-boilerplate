@@ -386,7 +386,7 @@ module.exports = {
 ### **Mac環境でのテスト**
 
 ```bash
-yarn build && lhci autorun
+pnpm build && lhci autorun
 ```
 
 問題なく実行されることを確認します。
@@ -394,7 +394,7 @@ yarn build && lhci autorun
 ### **WSL2環境でのテスト**
 
 ```bash
-yarn build && lhci autorun
+pnpm build && lhci autorun
 ```
 
 エラーが発生せず、正常に実行されることを確認します。

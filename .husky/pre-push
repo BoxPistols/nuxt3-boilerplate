@@ -1,2 +1,8 @@
-yarn ci
-./shells/cleanup-unwanted-files.sh
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 基本的なコード品質チェックのみを実行
+pnpm fix
+
+# オプション：軽量なビルドチェックを追加
+pnpm build

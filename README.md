@@ -57,11 +57,11 @@ Lighthouse CIを使用してウェブパフォーマンス、アクセシビリ�
 
 ### 主要コマンド
 
-- 実行: `yarn lh`
-- 最新レポート表示: `yarn lh:view`
-- 複数レポート表示: `yarn lh:view:all`
-- クリーンアップ: `yarn lh:clean`
-- 全削除: `yarn lh:cleanAll`
+- 実行: `pnpm lh`
+- 最新レポート表示: `pnpm lh:view`
+- 複数レポート表示: `pnpm lh:view:all`
+- クリーンアップ: `pnpm lh:clean`
+- 全削除: `pnpm lh:cleanAll`
 
 ### 設定ファイル
 
