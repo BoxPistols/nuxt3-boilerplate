@@ -1,4 +1,4 @@
-name: Prettier Check and Fix
+name: Prettier
 
 on: [push]
 
@@ -7,41 +7,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check out the repository code so that it can be accessed by subsequent steps
-      - uses: actions/checkout@v3
+      # Check out the repository code
+      - uses: actions/checkout@v2
 
       # Set up Node.js environment using the specified version
-      - uses: actions/setup-node@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "20.x" # Use the latest Node.js 20.x version to avoid issues with specific patch versions
+          node-version: "20.13.1" # Align with the version specified in package.json
 
       # Set up pnpm (a fast, disk space efficient package manager)
       - uses: pnpm/action-setup@v2
         with:
-          version: 9.14.4 # pnpm version to use
+          version: 9.14.4 # pnpm version to use, aligned with package.json
 
       # Install dependencies using pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile # Install without enforcing the lockfile to ensure compatibility
+        run: pnpm install --no-frozen-lockfile # Use --no-frozen-lockfile for compatibility with current setup
 
-      # Run Prettier Check - this step will fail if any code formatting issues are found
-      - name: Run Prettier Check
-        id: prettier-check # Assign an ID to refer to the outcome in subsequent steps
-        run: pnpm run format:check # Executes the script defined in package.json to check code formatting
-
-      # Run Prettier Fix - automatically fixes formatting issues if the check fails
-      - name: Run Prettier Fix
-        if: steps.prettier-check.outcome == 'failure' # Only run if the previous Prettier Check step failed
-        run: pnpm run format:fix # Executes the script defined in package.json to fix formatting issues
-
-      # Commit and push the formatting changes back to the repository
-      - name: Commit and Push Changes
-        if: steps.prettier-check.outcome == 'failure' # Run if the previous formatting fix was successful and changes were made
+      # Run Prettier and check for formatting changes
+      - name: Run Prettier
         run: |
-          git config --global user.name 'github-actions'  # Configure Git user name for the commit
-          git config --global user.email 'github-actions@github.com'  # Configure Git user email for the commit
-          git add .  # Stage all changes
-          git commit -m 'chore: format code with Prettier'  # Commit the changes with a message
-          git push  # Push the changes to the repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token to authenticate the push operation
+          pnpm run format  # Use the correct format script defined in package.json
+          git diff --exit-code
