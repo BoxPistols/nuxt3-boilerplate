@@ -11,26 +11,11 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./*"
-      ],
-      "@/*": [
-        "./*"
-      ]
+      "~/*": ["./*"],
+      "@/*": ["./*"]
     },
-    "types": [
-      "@nuxt/types",
-      "@types/node",
-      "@nuxt/typescript-build"
-    ]
+    "types": ["@nuxt/types", "@types/node", "@nuxt/typescript-build"]
   },
-  "include": [
-    ".nuxt/nuxt.d.ts",
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".nuxt"
-  ]
+  "include": [".nuxt/nuxt.d.ts", "**/*"],
+  "exclude": ["node_modules", "dist", ".nuxt"]
 }

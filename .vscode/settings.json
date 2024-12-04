@@ -32,5 +32,8 @@
   "vetur.format.defaultFormatter.css": "prettier",
   "vetur.format.defaultFormatter.scss": "prettier",
   "workbench.tree.stickyScrollMaxItemCount": 5,
-  "editor.stickyScroll.maxLineCount": 5
+  "editor.stickyScroll.maxLineCount": 5,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
