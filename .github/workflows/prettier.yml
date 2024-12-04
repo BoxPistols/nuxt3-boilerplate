@@ -23,7 +23,7 @@ jobs:
 
       # Install dependencies using pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile # Use --no-frozen-lockfile for compatibility with current setup
+        run: pnpm install --frozen-lockfile # Use --no-frozen-lockfile for compatibility with current setup
 
       # Run Prettier and check for formatting changes
       - name: Run Prettier
