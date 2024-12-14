@@ -1,6 +1,13 @@
 import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
+  buildModules: ['@nuxt/typescript-build'],
+  // auto import components: https://go.nuxtjs.dev/config-components
+  components: true,
+  autoImport: {
+    // custom component directory
+    customComponents: '~/components',
+  },
   devtools: {
     enabled: true,
     timeline: {
@@ -21,6 +28,8 @@ export default defineNuxtConfig({
   app: {
     baseURL: '/',
     head: {
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
       htmlAttrs: {
         lang: 'ja',
       },
@@ -74,5 +83,5 @@ export default defineNuxtConfig({
   ssr: false,
 
   modules: ['@nuxtjs/tailwindcss'],
-  compatibilityDate: '2024-08-12',
+  compatibilityDate: '2024-12-15',
 })
