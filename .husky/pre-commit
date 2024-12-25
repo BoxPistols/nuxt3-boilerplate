@@ -1,1 +1,2 @@
-lint-staged
+echo "Starting pre-commit hook"
+pnpm run lint-staged

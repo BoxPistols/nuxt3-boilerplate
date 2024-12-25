@@ -1,1 +1,4 @@
-pnpm fix && pnpm ci
+echo "Starting pre-push hook"
+pnpm fix
+pnpm run build 
+pnpm ci
