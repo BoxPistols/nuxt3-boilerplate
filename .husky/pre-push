@@ -1,4 +1,2 @@
 echo "Starting pre-push hook"
-pnpm fix
-pnpm run build 
-pnpm ci
+pnpm build && node scripts/lighthouse-manager.js clean && lhci autorun && node scripts/lighthouse-manager.js rename-and-process && node scripts/lighthouse-manager.js open
