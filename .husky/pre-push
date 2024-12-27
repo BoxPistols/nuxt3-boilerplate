@@ -1,8 +1,5 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# 基本的なコード品質チェックのみを実行
-pnpm fix
-
-# オプション：軽量なビルドチェックを追加
-pnpm build
+echo "Starting pre-push hook"
+pnpm run build
+pnpm run fix
+node scripts/lighthouse-manager.js clean
+pnpm run lh
