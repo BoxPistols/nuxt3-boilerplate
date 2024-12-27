@@ -1,5 +1,4 @@
 echo "Starting pre-push hook"
-pnpm run build
 pnpm run fix
 node scripts/lighthouse-manager.js clean
 pnpm run lh
