@@ -13,11 +13,8 @@ Look at the [Nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
 Make sure to install the dependencies:
 
 ```bash
-# yarn
-yarn
-
-# npm
-npm install
+# pnpm
+pnpm
 
 # pnpm
 pnpm install --shamefully-hoist

@@ -10,11 +10,15 @@
     "postinstall": "nuxt prepare",
     "sb": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "lint": "eslint --ext .vue,.ts,.js .",
+    "lint": "eslint --ext .ts,.js,.vue . --max-warnings 0 --cache --fix",
+    "lint-staged": "lint-staged",
+    "warn": "eslint --ext .ts,.js,.vue --format stylish .",
+    "error": "eslint --ext .ts,.js,.vue --quiet .",
+    "format": "prettier --write \"**/*.{js,ts,vue,json,yml,yaml,md}\"",
+    "check": "prettier --write . && git diff --exit-code",
+    "fix": "pnpm run check && prettier --write --list-different . && pnpm run lint",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
-    "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
     "format:check": "prettier --check .",
-    "fix": "pnpm lint:fix && pnpm format",
     "lh": "pnpm build && lhci autorun && node scripts/lighthouse-manager.js rename-and-process && node scripts/lighthouse-manager.js open",
     "lh:view": "node scripts/lighthouse-manager.js open 1",
     "lh:view:all": "node scripts/lighthouse-manager.js open 12",
@@ -37,6 +41,7 @@
     "@storybook/test": "^8.4.6",
     "@storybook/vue3": "^8.4.6",
     "@storybook/vue3-webpack5": "^8.4.6",
+    "@types/node": "^20.8.6",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@vue/compiler-sfc": "^3.5.13",
     "autoprefixer": "^10.4.20",
@@ -48,7 +53,7 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0",
     "eslint-plugin-vue": "^9.32.0",
-    "husky": "^8.0.0",
+    "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "nuxt": "^3.14.1592",
     "postcss": "^8.4.49",
@@ -57,26 +62,21 @@
     "typescript": "~5.3.3",
     "vue": "^3.5.13",
     "vue-loader": "^17.4.2",
-    "vue-router": "^4.5.0",
-    "@types/node": "^20.8.6"
+    "vue-router": "^4.5.0"
   },
-  "volta": {
-    "node": "20.13.1",
-    "yarn": "1.22.22",
-    "pnpm": "9.14.4"
-  },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@nuxt/types": "^2.18.1",
     "fix": "^0.0.6"
   },
+  "volta": {
+    "node": "20.13.1",
+    "pnpm": "9.15.1"
+  },
   "lint-staged": {
     "*.{js,ts,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{js,ts,vue,css,scss,json,md}": [
-      "prettier --write"
+      "prettier --write",
+      "eslint --cache --fix"
     ]
   }
 }
