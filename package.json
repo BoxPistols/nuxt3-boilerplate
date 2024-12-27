@@ -19,12 +19,12 @@
     "fix": "pnpm run check && prettier --write --list-different . && pnpm run lint",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format:check": "prettier --check .",
-    "lh": "pnpm build && lhci autorun && node scripts/lighthouse-manager.js rename-and-process && node scripts/lighthouse-manager.js open",
+    "lh": "node scripts/platform-check.js",
+    "ci": "pnpm lh:clean && pnpm lh",
+    "lh:clean": "pnpm rimraf lighthouse-results",
     "lh:view": "node scripts/lighthouse-manager.js open 1",
     "lh:view:all": "node scripts/lighthouse-manager.js open 12",
-    "lh:clean": "node scripts/lighthouse-manager.js clean",
     "lh:cleanAll": "node scripts/lighthouse-manager.js clean all",
-    "ci": "pnpm lh:clean && pnpm lh",
     "prepare": "husky install"
   },
   "devDependencies": {

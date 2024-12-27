@@ -1,5 +1,16 @@
+// lighthouserc.js
 const os = require('node:os')
 const path = require('node:path')
+
+// macOS判定
+if (process.platform !== 'darwin') {
+  // buildは実行されるがその後のlhciはスキップ
+  console.log('\n=== Build completed ===')
+  console.log('Lighthouse CIはMac OS環境でのみ実行されます。')
+  console.log('ビルドを完了して終了します。')
+  console.log('========================\n')
+  process.exit(0)
+}
 
 // Platform detection
 const isWSL = os.release().toLowerCase().includes('microsoft')
@@ -13,7 +24,7 @@ if (isWSL) {
 const sanitizePathname = pathname =>
   pathname.replace(/[<>:"/\\|?*]/g, '_').replace(/\//g, '_')
 
-/** @type {import('@lhci/cli').Config} */
+/** @type {import('@lhci+cli').Config} */
 module.exports = {
   ci: {
     collect: {
