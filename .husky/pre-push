@@ -1,4 +1,4 @@
 echo "Starting pre-push hook"
-pnpm run fix
 pnpm run build
+pnpm run fix
 pnpm run lh
