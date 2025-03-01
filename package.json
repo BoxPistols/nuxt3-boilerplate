@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare",
     "sb": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "lint": "eslint --ext .ts,.js,.vuen . --max-warnings 0 --cache --fix",
+    "lint": "eslint --ext .ts,.js,.vue . --max-warnings 0 --cache --fix",
     "lint-staged": "lint-staged",
     "warn": "eslint --ext .ts,.js,.vue --format stylish .",
     "error": "eslint --ext .ts,.js,.vue --quiet .",
