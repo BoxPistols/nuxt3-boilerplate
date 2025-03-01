@@ -8,11 +8,11 @@ jobs:
     name: Lighthouse CI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.13.1'
+          node-version: "20.13.1"
 
       - uses: pnpm/action-setup@v2
         with:
@@ -30,7 +30,7 @@ jobs:
           lhci autorun
 
       - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lighthouse-results
           path: ./lighthouse-results
