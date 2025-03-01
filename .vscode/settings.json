@@ -27,10 +27,6 @@
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
-  "vetur.format.defaultFormatter.html": "prettier",
-  "vetur.format.defaultFormatter.js": "prettier",
-  "vetur.format.defaultFormatter.css": "prettier",
-  "vetur.format.defaultFormatter.scss": "prettier",
   "workbench.tree.stickyScrollMaxItemCount": 5,
   "editor.stickyScroll.maxLineCount": 5,
   "[jsonc]": {
@@ -39,5 +35,11 @@
   "editor.tabSize": 2,
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
-  }
+  },
+  "vue3snippets.jsxSingleQuote": true,
+  "vue3snippets.singleQuote": true,
+  "prettier.jsxSingleQuote": true,
+  "prettier.singleQuote": true,
+  "yaml.format.singleQuote": true,
+  "eslint.problems.shortenToSingleLine": true
 }
