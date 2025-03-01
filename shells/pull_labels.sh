@@ -1,22 +1,4 @@
 #!/bin/bash
-# スクリプトに実行権限を付与
-# chmod +x shells/pull_labels.sh
-#
-# 実行コマンド
-# $ sh ./shells/pull_labels.sh
-#
-# 事前にGitHub CLIをインストールしておく必要があります
-# https://cli.github.com/manual/installation
-# $ gh auth login
-#
-# ? Where do you use GitHub? GitHub.com
-# ? What is your preferred protocol for Git operations on this host? HTTPS
-# ? Authenticate Git with your GitHub credentials? Yes
-# ? How would you like to authenticate GitHub CLI? Login with a web browser
-# ! First copy your one-time code: ABCD-1234
-# Press Enter to open https://github.com/login/device in your browser...
-
-#!/bin/bash
 set -eo pipefail
 
 # リポジトリ情報の自動取得
