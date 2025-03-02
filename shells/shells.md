@@ -8,7 +8,7 @@
 
 ## 基本設定
 
-事前にGitHub CLIをインストールしておく必要があります<br/>
+事前にGitHub CLIをインストールしておく必要があります
 <https://cli.github.com/manual/installation>
 
 クリプトに実行権限を付与する例
@@ -24,5 +24,5 @@
 - ? Authenticate Git with your GitHub credentials? Yes
 - ? How would you like to authenticate GitHub CLI? Login with a web browser
 - ! First copy your one-time code: ABCD-1234
-- Press Enter to open https://github.com/login/device in your browser...
+- Press Enter to open <https://github.com/login/device> in your browser...
 - ブラウザでABCD-1234入力
