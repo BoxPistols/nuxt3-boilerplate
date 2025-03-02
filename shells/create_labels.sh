@@ -1,118 +1,173 @@
 #!/bin/bash
+
+# GitHub ラベル作成スクリプト
+
+# 使い方:
+# - chmod +x shells/create_labels.sh で実行権限を付与
+# - GitHub CLI が必要です: https://cli.github.com/manual/installation
+# - GitHub CLI でログイン済みであることを確認してください
+
+# - リポジトリのルートディレクトリで実行してください
+# - *既存ラベルがある場合は上書きされます
+
+# - ./shells/create_labels.sh で実行
+# - labels.json にラベル情報を記述
+
+# ラベル情報の例:
+# gh label list
+# gh label list -R "${REPO}" --json name でリポジトリのラベル一覧を取得
+# gh label delete "${name}" -R "${REPO}" --yes でラベルを削除
+# gh label create "${name}" -c "${color}" -d "${description}" -R "${REPO}" でラベルを作成
+
 set -eo pipefail
 
-# カラーコード定義
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# 環境検出
+IS_MACOS=false
+if [[ "$(uname)" == "Darwin" ]]; then
+  IS_MACOS=true
+fi
 
-# リポジトリ情報取得関数
+# ヘルプ表示
+show_help() {
+  echo "GitHub ラベル作成スクリプト"
+  echo "使い方: $(basename "$0") [JSONファイル]"
+  echo "  JSONファイル: 省略時は labels.json"
+  echo
+  echo "例:"
+  echo "  $(basename "$0")"
+  echo "  $(basename "$0") my_labels.json"
+}
+
+# コマンドラインオプション処理
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  show_help
+  exit 0
+fi
+
+# リポジトリ情報の自動取得
 get_repo_info() {
   local remote_url
   if ! remote_url=$(git remote get-url origin 2>/dev/null); then
-    echo -e "${RED}エラー: Gitリポジトリが見つかりません${NC}" >&2
-    echo -e "${YELLOW}解決策: スクリプトをGitリポジトリ内で実行してください${NC}" >&2
+    echo "エラー: Gitリポジトリが見つかりません" >&2
+    echo "このコマンドはGitリポジトリのルートディレクトリで実行してください" >&2
     exit 1
   fi
 
-  REPO=$(echo "${remote_url}" | sed -E \
-    -e 's#^(git@|https://|ssh://git@)(github[.]com[:/])?##' \
-    -e 's#(\.git|/)$##' \
-    -e 's#[:/]#/#g' \
-    -e 's#//+#/#g')
+  # 異なるGit URL形式に対応
+  if [[ "$remote_url" =~ ^https://github.com/ ]]; then
+    # HTTPS形式: https://github.com/ユーザー/リポジトリ.git
+    REPO=$(echo "$remote_url" | sed -E 's#^https://github.com/##' | sed -E 's/\.git$//')
+  elif [[ "$remote_url" =~ ^git@github.com: ]]; then
+    # SSH形式: git@github.com:ユーザー/リポジトリ.git
+    REPO=$(echo "$remote_url" | sed -E 's#^git@github.com:##' | sed -E 's/\.git$//')
+  else
+    echo "エラー: サポートされていないGit URL形式です: $remote_url" >&2
+    exit 1
+  fi
 
   if [[ -z "$REPO" ]]; then
-    echo -e "${RED}エラー: リポジトリ情報の解析に失敗しました${NC}" >&2
-    echo -e "入力値: ${remote_url}" >&2
+    echo "エラー: リポジトリ情報の取得に失敗しました" >&2
     exit 1
   fi
 }
 
-# 依存関係チェック関数
-check_dependencies() {
-  local missing=()
-  local required=("jq" "gh" "git")
+# base64デコード関数（環境差異を吸収）
+decode_base64() {
+  if $IS_MACOS; then
+    # macOS
+    echo "$1" | base64 --decode
+  else
+    # Linux
+    echo "$1" | base64 --decode
+  fi
+}
 
-  for cmd in "${required[@]}"; do
-    if ! command -v "${cmd}" &>/dev/null; then
-      missing+=("${cmd}")
+# 依存コマンドのチェック
+check_dependencies() {
+  for cmd in jq gh git base64; do
+    if ! command -v $cmd &>/dev/null; then
+      echo "エラー: $cmd がインストールされていません" >&2
+      case $cmd in
+      jq)
+        echo "  インストール方法:"
+        echo "    MacOS: brew install jq"
+        echo "    Ubuntu: sudo apt install jq"
+        ;;
+      gh)
+        echo "  インストール方法: https://cli.github.com/manual/installation"
+        ;;
+      git)
+        echo "  インストール方法:"
+        echo "    MacOS: brew install git"
+        echo "    Ubuntu: sudo apt install git"
+        ;;
+      esac
+      exit 1
     fi
   done
 
-  if [ ${#missing[@]} -gt 0 ]; then
-    echo -e "${RED}エラー: 次の必須ツールが不足しています =>${NC}" >&2
-    for cmd in "${missing[@]}"; do
-      case "$cmd" in
-      "jq") echo -e "  - jq: JSON処理ツール (https://stedolan.github.io/jq/)" ;;
-      "gh") echo -e "  - GitHub CLI: GitHub公式CLI (https://cli.github.com)" ;;
-      "git") echo -e "  - Git: バージョン管理システム" ;;
-      esac
-    done
+  # GitHub CLIの認証状態を確認
+  if ! gh auth status &>/dev/null; then
+    echo "エラー: GitHub CLIの認証が必要です" >&2
+    echo "  認証方法: gh auth login" >&2
     exit 1
   fi
 }
 
-# ラベル作成メイン関数
-create_labels() {
-  local total=$(jq 'length' labels.json)
-  local count=0
-  local success=0
-  local fail=0
+# メイン処理
+main() {
+  # 入力ファイルの設定
+  JSON_FILE=${1:-"labels.json"}
 
-  echo -e "${YELLOW}ラベル作成を開始します...${NC}"
+  # 依存コマンドのチェック
+  check_dependencies
 
-  while IFS= read -r row; do
-    ((count++))
+  # 入力ファイルの存在確認
+  if [ ! -f "$JSON_FILE" ]; then
+    echo "エラー: $JSON_FILE が見つかりません" >&2
+    exit 1
+  fi
+
+  # リポジトリ情報取得
+  get_repo_info
+  echo "対象リポジトリ: $REPO"
+
+  # ラベル数の取得
+  total=$(jq '. | length' "$JSON_FILE")
+  echo "読み込んだラベル数: $total"
+
+  # ラベル作成
+  echo "リポジトリ $REPO にラベルを作成しています..."
+  current=0
+
+  for row in $(jq -r '.[] | @base64' "$JSON_FILE"); do
     _jq() {
-      echo "${row}" | base64 --decode | jq -r "${1}"
+      decode_base64 "$row" | jq -r "${1}"
     }
 
     name=$(_jq '.name')
     color=$(_jq '.color')
     description=$(_jq '.description')
 
-    printf "[%02d/%02d] %-25s" "${count}" "${total}" "${name}"
+    current=$((current + 1))
+    echo "[$current/$total] ラベル '${name}' を処理中..."
 
-    if gh label create "${name}" \
-      --color "${color}" \
-      --description "${description}" \
-      --repo "${REPO}" \
-      --force >/dev/null 2>&1; then
-      echo -e " ${GREEN}✓ 成功${NC}"
-      ((success++))
-    else
-      echo -e " ${RED}✗ 失敗${NC}"
-      ((fail++))
+    # 既存ラベルのチェックと処理
+    if gh label list -R "${REPO}" --json name | jq -r '.[].name' | grep -q "^${name}$"; then
+      echo "  既存ラベル '${name}' を更新します"
+      gh label delete "${name}" -R "${REPO}" --yes
     fi
-  done < <(jq -r '.[] | @base64' labels.json)
 
-  echo -e "\n${GREEN}完了: ${success}個のラベルを作成${NC}"
-  [ $fail -gt 0 ] && echo -e "${RED}警告: ${fail}個のラベル作成に失敗${NC}"
+    if ! gh label create "${name}" -c "${color}" -d "${description}" -R "${REPO}"; then
+      echo "  警告: ラベル '${name}' の作成に失敗しました" >&2
+      # ここではエラーを無視して続行
+    else
+      echo "  ✓ ラベル '${name}' を作成しました"
+    fi
+  done
+
+  echo "成功: $current/$total 個のラベルを処理しました"
 }
 
-# メイン処理
-main() {
-  check_dependencies
-  get_repo_info
-
-  echo -e "\n${YELLOW}===== GitHubラベル管理ツール =====${NC}"
-  echo -e "対象リポジトリ: ${GREEN}${REPO}${NC}"
-  echo -e "ラベル定義ファイル: ${GREEN}labels.json${NC}"
-  echo -e "処理日時: ${GREEN}$(date +"%Y-%m-%d %H:%M:%S")${NC}\n"
-
-  if [ ! -f "labels.json" ]; then
-    echo -e "${RED}エラー: labels.jsonが存在しません${NC}" >&2
-    exit 1
-  fi
-
-  if ! jq empty labels.json >/dev/null 2>&1; then
-    echo -e "${RED}エラー: labels.jsonの形式が不正です${NC}" >&2
-    exit 1
-  fi
-
-  create_labels
-}
-
-# 実行
+# スクリプト実行
 main "$@"

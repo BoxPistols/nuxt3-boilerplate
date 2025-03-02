@@ -1,5 +1,10 @@
 [
   {
+    "color": "f7c6c7",
+    "description": "テストコードの追加、修正",
+    "name": "Test"
+  },
+  {
     "color": "bfdadc",
     "description": "Backend for FrontEnd",
     "name": "BFF"
