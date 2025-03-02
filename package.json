@@ -67,7 +67,8 @@
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@nuxt/types": "^2.18.1",
-    "fix": "^0.0.6"
+    "fix": "^0.0.6",
+    "rimraf": "^6.0.1"
   },
   "volta": {
     "node": "20.13.1",
