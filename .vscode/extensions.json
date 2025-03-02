@@ -6,7 +6,8 @@
     "usernamehw.errorlens",
     "wayou.vscode-todo-highlight",
     "gruntfuggly.todo-tree",
-    "shakram02.bash-beautify"
+    "shakram02.bash-beautify",
+    "foxundermoon.shell-format"
   ]
   // VS拡張に @recommended を入力すると、おすすめの拡張機能が表示されます。
 }
