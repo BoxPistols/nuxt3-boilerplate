@@ -77,45 +77,20 @@ list_milestones() {
   local username="$1"
   local repo="$2"
 
-  # 最初のマイルストーンから曜日とスプリントサイクルを取得
-  local first_milestone_info=$(github_api GET "/repos/$username/$repo/milestones?state=all" | jq -r 'first | "\(.due_on)"')
+  printf "マイルストーン一覧:\n"
+  printf "番号 | リリース日 週番号\n"
+  printf "%s\n" "----------------------------------------"
 
-  if [ -n "$first_milestone_info" ] && [ "$first_milestone_info" != "null" ]; then
-    local utc_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "${first_milestone_info}" "+%s")
-    local jst_epoch=$((utc_epoch + 32400))
-    local dow_num=$(date -j -r "$jst_epoch" "+%u")
-    local next_dow_num=$(((dow_num % 7) + 1)) # 次の曜日を計算
-    local days=("月" "火" "水" "木" "金" "土" "日")
-    local sprint_day=${days[$((next_dow_num - 1))]}
-
-    # スプリント情報のヘッダー表示（次の曜日）
-    printf "マイルストーン一覧:\n"
-    printf "番号 | タイトル / 毎週%s曜 1Week Sprint\n" "$sprint_day"
-    printf "%s\n" "----------------------------------------"
-
-    # マイルストーンの取得とソート（日付順）
-    github_api GET "/repos/$username/$repo/milestones?state=all" |
-      jq -r '.[] | "\(.number),\(.title),\(.due_on)"' |
-      sort -t',' -k3 |
-      while IFS=',' read -r number title due_date; do
-        if [ -n "$due_date" ] && [ "$due_date" != "null" ]; then
-          local utc_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "${due_date}" "+%s")
-          local jst_epoch=$((utc_epoch + 32400))
-
-          local start_date=$(date -j -v-6d -r "$jst_epoch" "+%m-%d")
-          local end_date=$(date -j -r "$jst_epoch" "+%m-%d")
-
-          local week_num=$(echo "$title" | grep -o 'W[0-9]\+')
-          local year_prefix=$(echo "$title" | cut -c1-3)
-
-          local formatted_title="$week_num $year_prefix$start_date - $end_date"
-        fi
-
-        printf "%-5s | %-30s\n" "$number" "$formatted_title"
-      done
-  else
-    printf "マイルストーンが見つかりません。\n"
-  fi
+  # マイルストーンの取得とソート（日付順）
+  github_api GET "/repos/$username/$repo/milestones?state=all" |
+    jq -r '.[] | "\(.number),\(.title),\(.due_on)"' |
+    sort -t',' -k3 |
+    awk -F',' 'BEGIN{count=1} {print count++","$2","$3}' |
+    while IFS=',' read -r number title due_date; do
+      if [ -n "$due_date" ] && [ "$due_date" != "null" ]; then
+        printf "%-5s | %s\n" "$number" "$title"
+      fi
+    done
 }
 
 delete_all_milestones() {
@@ -206,55 +181,47 @@ main() {
     case $choice in
     1)
       echo "開始日 (YYYY-MM-DD):"
-      read -r start_date
+      read -e -r start_date
       echo "終了日 (YYYY-MM-DD):"
-      read -r end_date
+      read -e -r end_date
       echo "スプリントの終了曜日を選択してください (月=1, 火=2, 水=3, 木=4, 金=5, 土=6, 日=7):"
-      read -r sprint_end_day
+      read -e -r sprint_end_day
       echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
-      read -r sprint_cycle
+      read -e -r sprint_cycle
       echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは17:00):"
-      read -r custom_time
+      read -e -r custom_time
       custom_time=${custom_time:-17:00}
-
-      echo "マイルストーンの命名ルールを選択してください:"
-      echo "1) デフォルト (YY-MM-DD 曜日 W週番号)"
-      echo "2) カスタム"
-      read -r naming_choice
-
-      if [ "$naming_choice" == "2" ]; then
-        echo "カスタム命名ルールを入力してください (使用可能な変数: {date}, {day}, {week}, {year}):"
-        read -r custom_naming
-      fi
 
       days=("月" "火" "水" "木" "金" "土" "日")
       day_name=${days[$((sprint_end_day - 1))]}
 
       overwrite_all=""
       current_date=$start_date
+
+      # 開始日を指定された曜日に調整
+      current_date=$(get_next_day_of_week "$start_date" $sprint_end_day)
+
       while [[ "$(date -j -f "%Y-%m-%d" "$current_date" +%s)" -le "$(date -j -f "%Y-%m-%d" "$end_date" +%s)" ]]; do
-        sprint_end=$(get_next_day_of_week "$current_date" $sprint_end_day)
-        sprint_end=$(date -j -v+"$((sprint_cycle * 7 - 7))d" -f "%Y-%m-%d" "$sprint_end" +%Y-%m-%d)
-        if [[ "$(date -j -f "%Y-%m-%d" "$sprint_end" +%s)" -gt "$(date -j -f "%Y-%m-%d" "$end_date" +%s)" ]]; then
-          break
-        fi
+        # スプリント終了日を計算（現在の日付がそのまま終了日）
+        sprint_end=$current_date
+
+        # スプリント開始日を計算（終了日の1週間前）
+        sprint_start=$(date -j -v-6d -f "%Y-%m-%d" "$sprint_end" +%Y-%m-%d)
+
         week_number=$(get_week_number "$sprint_end")
         year=$(get_year "$sprint_end")
         formatted_date=$(get_formatted_date "$sprint_end")
-        day_of_week=$(get_day_of_week "$sprint_end")
 
-        if [ "$naming_choice" == "2" ]; then
-          title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
-        else
-          # title="$formatted_date $day_name W$week_number"
-          title="$formatted_date W$week_number"
-        fi
+        # タイトルを生成
+        title="$formatted_date W$week_number"
 
-        description="期間: $current_date から $sprint_end (${day_name}曜日)"
+        # 説明文に正確な期間を含める
+        description="期間: $sprint_start から $sprint_end"
 
         create_or_update_milestone "$GITHUB_USERNAME" "$GITHUB_REPO" "$title" "$sprint_end" "$description"
 
-        current_date=$(add_days "$sprint_end" 1)
+        # 次の週に進む（7日後）
+        current_date=$(date -j -v+7d -f "%Y-%m-%d" "$current_date" +%Y-%m-%d)
       done
       ;;
     2)

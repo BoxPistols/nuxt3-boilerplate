@@ -14,12 +14,20 @@ export PAGER=cat
 # エラー時にスクリプトを終了し、デバッグ情報を表示
 set -e
 
+# スクリプトの先頭に追加
+handle_error() {
+  echo "エラーが発生しました: $1"
+  exit 1
+}
+
+trap 'handle_error "$BASH_COMMAND"' ERR
+
 # GitHub API関数
 github_api() {
   local method="$1"
   local endpoint="$2"
   shift 2
-  gh api --method "$method" -H "Accept: application/vnd.github+json" "$@" -- "$endpoint" 2>&1
+  gh api --method "$method" -H "Accept: application/vnd.github+json" "$@" "$endpoint" 2>/dev/null
 }
 
 # マイルストーン操作
@@ -45,41 +53,16 @@ create_or_update_milestone() {
     fi
 
     local milestone_number=$(echo "$existing_milestone" | jq -r '.number')
-
-    # due_on を ISO 8601 形式に変換（UTCに変換）
-    custom_time=${custom_time:-17:00:00}
-    due_on_iso=$(TZ=Asia/Tokyo date -d "$due_date $custom_time" -u +"%Y-%m-%dT%H:%M:%SZ")
-    echo "due_on_iso: $due_on_iso"
-
-    output=$(github_api PATCH "/repos/$username/$repo/milestones/$milestone_number" \
-      -f title="$title" \
-      -f due_on="$due_on_iso" \
-      -f description="$description")
-    status=$?
-
-    if [ $status -eq 0 ]; then
-      echo "更新: $title (終了: $due_date $custom_time)"
+    if github_api PATCH "/repos/$username/$repo/milestones/$milestone_number" -f title="$title" -f due_on="${due_date}T${custom_time}:00Z" -f description="$description"; then
+      echo "更新: $title (終了: $due_date ${custom_time})"
     else
       echo "エラー: $title の更新に失敗"
-      echo "詳細: $output"
     fi
   else
-    # due_on を ISO 8601 形式に変換（UTCに変換）
-    custom_time=${custom_time:-17:00:00}
-    due_on_iso=$(TZ=Asia/Tokyo date -d "$due_date $custom_time" -u +"%Y-%m-%dT%H:%M:%SZ")
-    echo "due_on_iso: $due_on_iso"
-
-    output=$(github_api POST "/repos/$username/$repo/milestones" \
-      -f title="$title" \
-      -f due_on="$due_on_iso" \
-      -f description="$description")
-    status=$?
-
-    if [ $status -eq 0 ]; then
-      echo "作成: $title (終了: $due_date $custom_time)"
+    if github_api POST "/repos/$username/$repo/milestones" -f title="$title" -f due_on="${due_date}T${custom_time}:00Z" -f description="$description"; then
+      echo "作成: $title (終了: $due_date ${custom_time})"
     else
       echo "エラー: $title の作成に失敗"
-      echo "詳細: $output"
     fi
   fi
 }
@@ -117,10 +100,27 @@ delete_all_milestones() {
 }
 
 list_milestones() {
-  github_api GET "/repos/$1/$2/milestones?state=all" | jq -r '.[] | "\(.number),\(.title),\(.due_on)"' | while IFS=',' read -r number title due_date; do
-    jp_date=$(TZ='Asia/Tokyo' date -d "${due_date}" '+%Y年%m月%d日 (%a) %H:%M')
-    echo "$number,$title,$jp_date"
-  done
+  local username="$1"
+  local repo="$2"
+
+  printf "マイルストーン一覧:\n"
+  printf "番号 | リリース日 週番号\n"
+  printf "%s\n" "----------------------------------------"
+
+  # マイルストーンの取得とソート（日付順）
+  github_api GET "/repos/$username/$repo/milestones?state=all" |
+    jq -r '.[] | "\(.number),\(.title),\(.due_on)"' |
+    sort -t',' -k3 |
+    awk -F',' '{
+      gsub("T.*Z", "", $3)  # UTCタイムスタンプから時間部分を削除
+      print $0
+    }' |
+    awk -F',' 'BEGIN{count=1} {print count++","$2","$3}' |
+    while IFS=',' read -r number title due_date; do
+      if [ -n "$due_date" ] && [ "$due_date" != "null" ]; then
+        printf "%-5s | %s\n" "$number" "$title"
+      fi
+    done
 }
 
 # 日付操作関数
@@ -131,12 +131,12 @@ add_days() {
 get_next_day_of_week() {
   local current_date=$1
   local target_day=$2
-  local current_day_of_week=$(date -d "$current_date" +%u)
-  local day_diff=$(((target_day - current_day_of_week + 7) % 7))
+  local current_day=$(date -d "$current_date" +%u)
+  local day_diff=$(((target_day - current_day + 7) % 7))
   if [ $day_diff -eq 0 ]; then
     day_diff=7
   fi
-  date -d "$current_date +$day_diff days" +%Y-%m-%d
+  date -d "$current_date + $day_diff days" +%Y-%m-%d
 }
 
 get_week_number() {
@@ -151,103 +151,121 @@ get_day_of_week() {
   date -d "$1" +%a
 }
 
-format_date() {
+get_formatted_date() {
   date -d "$1" +%y-%m-%d
 }
 
-# メイン処理
+to_jst() {
+  local utc_date="$1"
+  date -d "$utc_date +9 hours" "+%Y-%m-%d %H:%M:%S"
+}
+
+date_range() {
+  local start_date="$1"
+  local end_date="$2"
+  echo "$start_date から $end_date"
+}
+
+# リポジトリ情報を取得する関数を追加
+get_repo_info() {
+  # 既にセッション変数が設定されている場合はそれを使用
+  if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_REPO" ]; then
+    return 0
+  fi
+
+  # gitコマンドからリモートURL情報を取得
+  local remote_url=$(git config --get remote.origin.url)
+  if [ -z "$remote_url" ]; then
+    echo "エラー: Gitリポジトリが見つかりません。"
+    exit 1
+  fi
+
+  # GitHub URLからユーザー名とリポジトリ名を抽出
+  if [[ $remote_url =~ github\.com[:/]([^/]+)/([^/.]+)(.git)?$ ]]; then
+    GITHUB_USERNAME="${BASH_REMATCH[1]}"
+    GITHUB_REPO="${BASH_REMATCH[2]}"
+    echo "リポジトリ情報: $GITHUB_USERNAME/$GITHUB_REPO"
+  else
+    echo "エラー: GitHubリポジトリのURLを解析できません。"
+    exit 1
+  fi
+}
+
+# メイン処理を修正
 main() {
-  echo "GitHubユーザー名/組織名:"
-  read -r -e username
-  echo "リポジトリ名:"
-  read -r -e repo
+  # 初回実行時にリポジトリ情報を取得
+  get_repo_info
 
-  echo "操作を選択してください:"
-  echo "1) マイルストーン生成"
-  echo "2) マイルストーン一覧表示"
-  echo "3) マイルストーン選択削除"
-  echo "4) 全マイルストーン削除"
-  read -r -e choice
+  while true; do
+    echo "操作を選択してください:"
+    echo "1) マイルストーン生成"
+    echo "2) マイルストーン一覧表示"
+    echo "3) マイルストーン選択削除"
+    echo "4) 全マイルストーン削除"
+    echo "q) 終了"
+    read -r choice
 
-  case $choice in
-  1)
-    echo "開始日 (YYYY-MM-DD):"
-    read -r -e start_date
-    echo "終了日 (YYYY-MM-DD):"
-    read -r -e end_date
-    echo "スプリントの終了曜日を選択してください (月=1, 火=2, 水=3, 木=4, 金=5, 土=6, 日=7):"
-    read -r -e sprint_end_day
-    echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
-    read -r -e sprint_cycle
-    echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは17:00):"
-    read -r -e custom_time
-    custom_time=${custom_time:-17:00}
+    case $choice in
+    1)
+      echo "開始日 (YYYY-MM-DD):"
+      read -r -e start_date
+      echo "終了日 (YYYY-MM-DD):"
+      read -r -e end_date
+      echo "スプリントの終了曜日を選択してください (月=1, 火=2, 水=3, 木=4, 金=5, 土=6, 日=7):"
+      read -r -e sprint_end_day
+      echo "スプリントサイクルを週単位で入力してください (例: 1 または 2):"
+      read -r -e sprint_cycle
+      echo "マイルストーンの時間を入力してください (HH:MM 形式, デフォルトは17:00):"
+      read -r -e custom_time
+      custom_time=${custom_time:-17:00}
 
-    # custom_time を "HH:MM:SS" 形式にする
-    if [[ ! $custom_time =~ :[0-9]{2}$ ]]; then
-      custom_time="${custom_time}:00"
-    fi
+      days=("月" "火" "水" "木" "金" "土" "日")
+      day_name=${days[$((sprint_end_day - 1))]}
 
-    echo "マイルストーンの命名ルールを選択してください:"
-    echo "1) デフォルト (YY-MM-DD 曜日 W週番号)"
-    echo "2) カスタム"
-    read -r -e naming_choice
+      overwrite_all=""
+      current_date=$start_date
+      while [[ "$(date -d "$current_date" +%s)" -le "$(date -d "$end_date" +%s)" ]]; do
+        sprint_end=$(get_next_day_of_week "$current_date" $sprint_end_day)
+        if [[ "$(date -d "$sprint_end" +%s)" -gt "$(date -d "$end_date" +%s)" ]]; then
+          break
+        fi
+        week_number=$(get_week_number "$sprint_end")
+        formatted_date=$(get_formatted_date "$sprint_end")
 
-    if [ "$naming_choice" == "2" ]; then
-      echo "カスタム命名ルールを入力してください (使用可能な変数: {date}, {day}, {week}, {year}):"
-      read -r custom_naming
-    fi
-
-    days=("月" "火" "水" "木" "金" "土" "日")
-    day_name=${days[$((sprint_end_day - 1))]}
-
-    overwrite_all=""
-    current_date=$start_date
-    while [[ "$(date -d "$current_date" +%s)" -le "$(date -d "$end_date" +%s)" ]]; do
-      sprint_end=$(get_next_day_of_week "$current_date" $sprint_end_day)
-      sprint_end=$(date -d "$sprint_end +$((sprint_cycle * 7 - 7)) days" +%Y-%m-%d)
-      if [[ "$(date -d "$sprint_end" +%s)" -gt "$(date -d "$end_date" +%s)" ]]; then
-        break
-      fi
-      week_number=$(get_week_number "$sprint_end")
-      year=$(get_year "$sprint_end")
-      formatted_date=$(format_date "$sprint_end")
-      day_of_week=$(get_day_of_week "$sprint_end")
-
-      if [ "$naming_choice" == "2" ]; then
-        title=$(echo "$custom_naming" | sed "s/{date}/$formatted_date/g; s/{day}/$day_name/g; s/{week}/$week_number/g; s/{year}/$year/g")
-      else
-        # title="$formatted_date $day_name W$week_number"
         title="$formatted_date W$week_number"
+        description="期間: $current_date から $sprint_end (${day_name}曜日)"
+
+        create_or_update_milestone "$GITHUB_USERNAME" "$GITHUB_REPO" "$title" "$sprint_end" "$description"
+
+        current_date=$(add_days "$sprint_end" 1)
+      done
+      ;;
+    2)
+      echo "マイルストーン一覧:"
+      list_milestones "$GITHUB_USERNAME" "$GITHUB_REPO"
+      ;;
+    3)
+      delete_selected_milestones "$GITHUB_USERNAME" "$GITHUB_REPO"
+      ;;
+    4)
+      echo "全てのマイルストーンを削除します。よろしいですか？ (y/n)"
+      read -r -e confirm
+      if [[ $confirm == "y" ]]; then
+        delete_all_milestones "$GITHUB_USERNAME" "$GITHUB_REPO"
+      else
+        echo "削除をキャンセルしました。"
       fi
+      ;;
+    q | Q)
+      exit 0
+      ;;
+    *)
+      echo "無効な選択です。"
+      ;;
+    esac
 
-      description="期間: $current_date から $sprint_end (${day_name}曜日)"
-
-      create_or_update_milestone "$username" "$repo" "$title" "$sprint_end" "$description"
-
-      current_date=$(add_days "$sprint_end" 1)
-    done
-    ;;
-  2)
-    echo "マイルストーン一覧:"
-    list_milestones "$username" "$repo"
-    ;;
-  3)
-    delete_selected_milestones "$username" "$repo"
-    ;;
-  4)
-    echo "全てのマイルストーンを削除します。よろしいですか？ (y/n)"
-    read -r -e confirm
-    if [[ $confirm == "y" ]]; then
-      delete_all_milestones "$username" "$repo"
-    else
-      echo "削除をキャンセルしました。"
-    fi
-    ;;
-  *)
-    echo "無効な選択です。"
-    ;;
-  esac
+    echo # 空行を挿入
+  done
 }
 
 # GitHub CLIの確認
