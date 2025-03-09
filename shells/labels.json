@@ -17,11 +17,7 @@
     "description": "UIレイアウト構造がメインのU課題",
     "name": "Layout"
   },
-  {
-    "color": "f7c6c7",
-    "description": "テストコードの追加、修正",
-    "name": "Test"
-  },
+  { "color": "E99695", "description": "テスト", "name": "Test" },
   { "color": "d73a4a", "description": "バグ、不具合の対応", "name": "bug" },
   {
     "color": "0075ca",
