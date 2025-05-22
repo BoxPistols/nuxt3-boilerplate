@@ -2,7 +2,7 @@
 <template>
   <div class="flex flex-col min-h-screen">
     <header
-      class="fixed top-0 left-0 w-full py-4 bg-opacity-50 bg-techBlue text-center z-50"
+      class="fixed top-0 left-0 w-full py-4 bg-opacity-50 bg-techBlue text-center z-50 px-4"
     >
       <nav class="container mx-auto flex justify-between items-center">
         <h1 class="text-3xl font-bold">My Tech Site</h1>
