@@ -23,7 +23,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^1.2.22024/10/13 19:22:59 JST5",
+    "@chromatic-com/storybook": "^1.2.25",
     "@lhci/cli": "^0.14.0",
     "@nuxt/devtools": "^1.0.3",
     "@nuxt/typescript-build": "^3.0.2",
