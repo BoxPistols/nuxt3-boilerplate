@@ -1,0 +1,10 @@
+node_modules/
+.nuxt/
+dist/
+.output/
+storybook-static/
+**/*.stories.js
+stories/**/*.vue
+**/*.md
+**/.github/
+coverage/

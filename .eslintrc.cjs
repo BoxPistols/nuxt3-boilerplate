@@ -1,21 +1,30 @@
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    parser: '@typescript-eslint/parser',
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
   extends: [
     '@nuxtjs/eslint-config-typescript',
+    'plugin:@typescript-eslint/recommended',
     'plugin:vue/vue3-recommended',
     'eslint:recommended',
     'prettier',
   ],
+  plugins: ['@typescript-eslint', 'vue'],
   ignorePatterns: [
     '**/*.stories.js',
     'stories/**/*.vue',
     '**/*.md',
     '**/.github/**',
+    'node_modules/**',
+    '.nuxt/**',
+    'dist/**',
+    'storybook-static/**',
+    '.output/**',
   ],
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: 'module',
-  },
   env: {
     node: true,
     browser: true,
@@ -28,6 +37,9 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/ban-ts-comment': 'warn',
     'vue/multi-word-component-names': 'off',
     'vue/singleline-html-element-content-newline': 'off',
     'vue/no-v-html': 'warn',

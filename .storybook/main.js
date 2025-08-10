@@ -1,18 +1,12 @@
-/** @type { import('@storybook/vue3-webpack5').StorybookConfig } */
+/** @type { import('@storybook/vue3-vite').StorybookConfig } */
 const config = {
   stories: [
     '../stories/**/*.mdx',
     '../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
-  addons: [
-    '@storybook/addon-webpack5-compiler-swc',
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@chromatic-com/storybook',
-    '@storybook/addon-interactions',
-  ],
+  addons: ['@storybook/addon-links', '@chromatic-com/storybook'],
   framework: {
-    name: '@storybook/vue3-webpack5',
+    name: '@storybook/vue3-vite',
     options: {},
   },
   docs: {

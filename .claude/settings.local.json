@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn info:*)",
+      "Bash(npm view:*)",
+      "Bash(yarn outdated)",
+      "Bash(yarn install)",
+      "Bash(npx storybook@latest upgrade:*)",
+      "Bash(yarn remove:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn storybook:*)",
+      "Bash(timeout 10 yarn storybook build)",
+      "Bash(yarn build-storybook)",
+      "Bash(timeout 15 yarn storybook)",
+      "Bash(yarn cache:*)",
+      "Bash(rm:*)",
+      "Bash(yarn fix)",
+      "Bash(yarn eslint:*)"
+    ],
+    "deny": []
+  }
+}

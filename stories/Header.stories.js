@@ -1,4 +1,4 @@
-import { fn } from '@storybook/test'
+// import { fn } from '@storybook/test'
 import MyHeader from './Header.vue'
 
 export default {
@@ -26,9 +26,9 @@ export default {
     layout: 'fullscreen',
   },
   args: {
-    onLogin: fn(),
-    onLogout: fn(),
-    onCreateAccount: fn(),
+    onLogin: () => {},
+    onLogout: () => {},
+    onCreateAccount: () => {},
   },
 }
 
