@@ -15,7 +15,11 @@
       "Bash(yarn cache:*)",
       "Bash(rm:*)",
       "Bash(yarn fix)",
-      "Bash(yarn eslint:*)"
+      "Bash(yarn eslint:*)",
+      "Bash(timeout 10 yarn storybook)",
+      "Bash(mkdir:*)",
+      "Bash(timeout 15 yarn storybook --port 6007)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }
