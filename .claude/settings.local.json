@@ -19,7 +19,9 @@
       "Bash(timeout 10 yarn storybook)",
       "Bash(mkdir:*)",
       "Bash(timeout 15 yarn storybook --port 6007)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(pnpm install:*)",
+      "Bash(yarn install:*)"
     ],
     "deny": []
   }

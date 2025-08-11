@@ -8,7 +8,7 @@ const config = {
     '@storybook/addon-links',
     '@storybook/addon-controls',
     '@storybook/addon-actions',
-    '@storybook/addon-docs'
+    '@storybook/addon-docs',
   ],
   framework: {
     name: '@storybook/vue3-vite',
@@ -22,7 +22,8 @@ const config = {
     reactDocgen: 'react-docgen-typescript',
     reactDocgenTypescriptOptions: {
       shouldExtractLiteralValuesFromEnum: true,
-      propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
+      propFilter: prop =>
+        prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
     },
   },
 }
