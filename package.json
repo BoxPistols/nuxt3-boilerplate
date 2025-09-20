@@ -13,6 +13,7 @@
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,vue,css,scss,json,md}\"",
     "fix": "yarn lint:fix && yarn format",
     "lh": "yarn build && lhci autorun && node scripts/lighthouse-manager.js rename-and-process && node scripts/lighthouse-manager.js open",
     "lh:view": "node scripts/lighthouse-manager.js open 1",
