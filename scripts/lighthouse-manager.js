@@ -50,8 +50,17 @@ function isNewFile(file) {
   )
 }
 
+// 結果ディレクトリの存在を保証するユーティリティ
+function ensureResultsDir() {
+  if (!fs.existsSync(RESULTS_DIR)) {
+    fs.mkdirSync(RESULTS_DIR, { recursive: true })
+  }
+}
+
 // レポートのリネームと処理を行う主要な関数
 function renameAndProcessReports() {
+  // ディレクトリがなければ作成して処理対象なしとして終了
+  ensureResultsDir()
   const files = fs.readdirSync(RESULTS_DIR) // 結果ディレクトリ内のファイルを取得
   const newFiles = files.filter(isNewFile) // 新しいファイルのみをフィルタリング
 
@@ -143,6 +152,10 @@ function openReports(maxCount) {
     console.log('Skipping report opening in CI environment')
     return
   }
+  if (!fs.existsSync(RESULTS_DIR)) {
+    console.log('No Lighthouse results directory found. Skip opening reports.')
+    return
+  }
   const htmlFiles = fs
     .readdirSync(RESULTS_DIR)
     .filter(file => file.endsWith('.html'))
@@ -167,6 +180,10 @@ function openReports(maxCount) {
 
 // 古いレポートを削除する関数
 function cleanupOldReports(cleanAll = false) {
+  if (!fs.existsSync(RESULTS_DIR)) {
+    console.log('No Lighthouse results directory found. Nothing to clean.')
+    return
+  }
   const now = Date.now()
   const files = fs.readdirSync(RESULTS_DIR)
   files.forEach(file => {
