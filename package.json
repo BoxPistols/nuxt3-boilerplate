@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt generate",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev -p 3333",
     "start": "nuxt start",
     "generate": "nuxt generate",
     "preview": "nuxt preview",

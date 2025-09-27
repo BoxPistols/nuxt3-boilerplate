@@ -30,5 +30,7 @@
   "vetur.format.defaultFormatter.html": "prettier",
   "vetur.format.defaultFormatter.js": "prettier",
   "vetur.format.defaultFormatter.css": "prettier",
-  "vetur.format.defaultFormatter.scss": "prettier"
+  "vetur.format.defaultFormatter.scss": "prettier",
+  "editor.tabSize": 2,
+  "editor.tabCompletion": "on"
 }

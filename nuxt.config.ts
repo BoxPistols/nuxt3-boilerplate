@@ -75,4 +75,14 @@ export default defineNuxtConfig({
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',
+
+  runtimeConfig: {
+    public: {
+      googlePlacesApiKey: process.env.NUXT_PUBLIC_GOOGLE_PLACES_API_KEY,
+      googlePlaceId: process.env.NUXT_PUBLIC_GOOGLE_PLACE_ID,
+      corsProxy:
+        process.env.NUXT_PUBLIC_CORS_PROXY ||
+        'https://cors-anywhere.herokuapp.com/',
+    },
+  },
 })
