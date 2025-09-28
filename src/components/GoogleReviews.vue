@@ -36,7 +36,7 @@
           <span class="stat-number">{{
             error ? mockReviews.length : filteredReviews.length
           }}</span>
-          <div class="stat-label">高評価レビュー</div>
+          <div class="stat-label">直近の評価数</div>
         </div>
       </div>
     </div>
@@ -465,11 +465,11 @@ onMounted(() => {
   --primary-color: #1a73e8;
   --primary-dark: #1557b0;
   --surface-color: #ffffff;
-  --background-color: #fafafa;
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --text-disabled: #666666;
-  --border-color: #e8eaed;
+  --background-color: #f9fafb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-disabled: #9ca3af;
+  --border-color: #e5e7eb;
   --shadow-light:
     0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
   --shadow-medium:
@@ -500,25 +500,27 @@ onMounted(() => {
 }
 
 .reviews-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 400;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .reviews-subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-secondary);
   font-weight: 300;
 }
 
 .stats-card {
-  background: var(--surface-color);
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: var(--shadow-light);
-  border: 1px solid var(--border-color);
+  /* background: #f9fafb; */
+  padding: 12px;
+  margin-bottom: 8px;
+  /* border-radius: 12px; */
+  /* box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06); */
+  /* border: 1px solid var(--border-color); */
 }
 
 .stats-grid {
@@ -600,9 +602,9 @@ onMounted(() => {
   border-radius: 16px;
   padding: 24px;
   box-shadow:
-    0 1px 2px 0 rgba(60, 64, 67, 0.3),
-    0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  border: 2px solid #e8eaed;
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-color);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -623,8 +625,10 @@ onMounted(() => {
 
 .review-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-medium);
-  border-color: rgba(26, 115, 232, 0.2);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-color: rgba(26, 115, 232, 0.3);
 }
 
 .review-card:hover::before {
