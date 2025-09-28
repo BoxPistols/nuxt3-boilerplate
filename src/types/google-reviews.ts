@@ -1,4 +1,4 @@
-// Google Places API の型定義
+// Google Places API と GoogleReviews コンポーネントの型定義
 export interface GoogleReview {
   author_name: string
   author_url?: string
@@ -24,20 +24,6 @@ export interface GooglePlacesResponse {
     user_ratings_total: number
     reviews: GoogleReview[]
   }
-}
-
-export interface GoogleReviewsConfig {
-  placeId: string
-  apiKey: string
-  corsProxy?: string
-  minRating?: number
-  language?: string
-}
-
-export interface ReviewStats {
-  totalReviews: number
-  averageRating: number
-  highRatingCount: number
 }
 
 export interface MockReview extends GoogleReview {
