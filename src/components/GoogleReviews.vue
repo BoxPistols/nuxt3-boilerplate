@@ -42,7 +42,7 @@
     </div>
 
     <div class="reviews-container">
-      <div class="reviews-scroll-wrapper">
+      <div ref="reviewsScrollWrapper" class="reviews-scroll-wrapper">
         <div v-if="!isLoading && !error" class="reviews-display">
           <div
             v-for="(review, index) in filteredReviews"
@@ -130,7 +130,7 @@
           <div class="reviews-display">
             <div
               v-for="(review, index) in mockReviews"
-              :key="`mock-${review.time}`"
+              :key="`mock-${index}`"
               class="review-card"
               :class="[
                 review.rating === 5 ? 'perfect-rating' : 'high-rating',
@@ -279,6 +279,9 @@ const businessInfo = ref<BusinessInfo | null>(null)
 const expandedReviews = ref<Record<number, boolean>>({})
 const imageLoadError = ref<Record<number, boolean>>({})
 const imageLoading = ref<Record<number, boolean>>({})
+
+// DOM要素の参照
+const reviewsScrollWrapper = ref<HTMLElement | null>(null)
 
 // Methods
 const fetchReviews = async (): Promise<void> => {
