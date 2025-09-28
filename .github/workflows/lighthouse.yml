@@ -23,3 +23,8 @@ jobs:
       - name: Run Lighthouse CI (basic check)
         run: |
           npx lhci autorun --collect.numberOfRuns=1
+      - name: Upload Lighthouse Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
