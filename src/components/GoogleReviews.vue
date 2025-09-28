@@ -417,7 +417,12 @@ const setupTouchEvents = (): void => {
   let startY = 0
   let isScrolling = false
 
-  const reviewsDisplay = document.querySelector('.reviews-display')
+  // Vueのrefを使用してDOM要素を取得
+  const scrollWrapper = reviewsScrollWrapper.value
+  if (!scrollWrapper) return
+
+  // スクロール可能な要素（.reviews-display）を取得
+  const reviewsDisplay = scrollWrapper.querySelector('.reviews-display')
   if (!reviewsDisplay) return
 
   reviewsDisplay.addEventListener('touchstart', (e: TouchEvent) => {
