@@ -460,7 +460,8 @@ onMounted(() => {
 
 <style scoped>
 /* CSS変数の定義 */
-:root {
+.google-reviews-container {
+  /* CSS変数の定義 */
   --primary-color: #1a73e8;
   --primary-dark: #1557b0;
   --surface-color: #ffffff;
@@ -477,9 +478,8 @@ onMounted(() => {
     0 2px 6px 2px rgba(60, 64, 67, 0.15), 0 8px 24px 4px rgba(60, 64, 67, 0.15);
   --star-color: #fbbc04;
   --star-empty: #e8eaed;
-}
 
-.google-reviews-container {
+  /* コンポーネントのスタイル */
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
