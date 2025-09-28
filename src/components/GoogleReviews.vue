@@ -248,6 +248,11 @@ import { mockReviews, mockBusinessInfo } from '~/data/mock-reviews'
 interface Props {
   placeId: string
   apiKey: string
+  /**
+   * CORSプロキシのURL（オプション）
+   * 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
+   * 開発環境では環境変数 NUXT_PUBLIC_CORS_PROXY で設定可能
+   */
   corsProxy?: string
   minRating?: number
   language?: string
@@ -256,7 +261,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  corsProxy: 'https://cors-anywhere.herokuapp.com/',
+  corsProxy: '', // 環境変数で設定してください
   minRating: 4,
   language: 'ja',
   googleReviewsUrl: 'https://share.google/o0NUxpGtlW8mg9N3r',
@@ -289,7 +294,9 @@ const fetchReviews = async (): Promise<void> => {
       `&language=${props.language}` +
       `&reviews_sort=newest`
 
-    const proxyUrl = props.corsProxy + targetUrl
+    // CORSプロキシが設定されている場合のみ使用
+    // 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
+    const proxyUrl = props.corsProxy ? props.corsProxy + targetUrl : targetUrl
     const response = await fetch(proxyUrl, {
       headers: {
         Origin: window.location.origin,
