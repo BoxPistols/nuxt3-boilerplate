@@ -87,7 +87,7 @@ export default defineNuxtConfig({
   },
   ssr: false,
 
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/storybook'],
   compatibilityDate: '2024-08-12',
 
   runtimeConfig: {

@@ -1,46 +1,90 @@
-// import { fn } from '@storybook/test'
-import MyButton from './Button.vue'
+import Button from '../src/components/UI/Button.vue'
 
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 export default {
-  title: 'Example/Button',
-  component: MyButton,
-  tags: ['autodocs'],
+  title: 'Components/Button',
+  component: Button,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'A versatile button component with multiple variants and sizes.',
+      },
+    },
+  },
   argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: [
+        'primary',
+        'secondary',
+        'success',
+        'warning',
+        'error',
+        'ghost',
+        'outline',
+      ],
+    },
     size: {
       control: { type: 'select' },
-      options: ['small', 'medium', 'large'],
+      options: ['xs', 'sm', 'md', 'lg', 'xl'],
     },
-    backgroundColor: { control: 'color' },
   },
-  // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
-  args: { onClick: () => {} },
 }
 
-// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary = {
   args: {
-    primary: true,
-    label: 'Button',
+    variant: 'primary',
   },
+  render: args => ({
+    components: { Button },
+    setup() {
+      return { args }
+    },
+    template: '<Button v-bind="args">Primary Button</Button>',
+  }),
 }
 
 export const Secondary = {
   args: {
-    label: 'Button',
+    variant: 'secondary',
   },
+  render: args => ({
+    components: { Button },
+    setup() {
+      return { args }
+    },
+    template: '<Button v-bind="args">Secondary Button</Button>',
+  }),
 }
 
-export const Large = {
-  args: {
-    size: 'large',
-    label: 'Button',
-  },
+export const AllSizes = {
+  render: () => ({
+    components: { Button },
+    template: `
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <Button size="xs">XS</Button>
+        <Button size="sm">SM</Button>
+        <Button size="md">MD</Button>
+        <Button size="lg">LG</Button>
+        <Button size="xl">XL</Button>
+      </div>
+    `,
+  }),
 }
 
-export const Small = {
-  args: {
-    size: 'small',
-    label: 'Button',
-  },
+export const AllVariants = {
+  render: () => ({
+    components: { Button },
+    template: `
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <Button variant="primary">Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="success">Success</Button>
+        <Button variant="warning">Warning</Button>
+        <Button variant="error">Error</Button>
+        <Button variant="ghost">Ghost</Button>
+        <Button variant="outline">Outline</Button>
+      </div>
+    `,
+  }),
 }

@@ -105,3 +105,7 @@ lighthouse-results/*.html
 lighthouse-results/*.json
 # !lighthouse-results/manifest.json
 lighthouse-results/manifest.json
+
+storybook-static
+
+.storybook

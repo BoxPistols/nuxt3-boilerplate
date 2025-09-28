@@ -1,0 +1,266 @@
+{
+  "name": "Nuxt3 Boilerplate Design System",
+  "version": "1.0.0",
+  "description": "A comprehensive design system for Nuxt 3 applications with tokens, components, and layouts",
+  "designTokens": {
+    "colors": {
+      "location": "src/tokens/colors.ts",
+      "description": "Color palette including primary, secondary, semantic colors, and component-specific mappings",
+      "categories": {
+        "primary": "Main brand colors with 11 shades (50-950)",
+        "secondary": "Supporting colors for less prominent elements",
+        "semantic": "Success, warning, and error colors for feedback",
+        "gray": "Neutral colors for text, borders, and backgrounds",
+        "text": "Semantic text color mappings",
+        "background": "Background color variations",
+        "border": "Border color options"
+      },
+      "usage": "import { colors } from '@/tokens/colors'"
+    },
+    "typography": {
+      "location": "src/tokens/typography.ts",
+      "description": "Typography system with font families, sizes, weights, and semantic text styles",
+      "categories": {
+        "fontFamily": "Sans, serif, and mono font stacks",
+        "fontSize": "Scale from xs (12px) to 9xl (128px)",
+        "fontWeight": "Weights from thin (100) to black (900)",
+        "lineHeight": "Line height variations for different contexts",
+        "letterSpacing": "Letter spacing for fine typography control",
+        "textStyles": "Semantic combinations for headings, body, and UI text"
+      },
+      "usage": "import { typography } from '@/tokens/typography'"
+    }
+  },
+  "components": {
+    "Button": {
+      "location": "src/components/UI/Button.vue",
+      "description": "Versatile button component with multiple variants, sizes, and states",
+      "category": "UI",
+      "props": {
+        "variant": {
+          "type": "string",
+          "default": "primary",
+          "options": [
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "error",
+            "ghost",
+            "outline"
+          ],
+          "description": "Visual style variant affecting color scheme"
+        },
+        "size": {
+          "type": "string",
+          "default": "md",
+          "options": ["xs", "sm", "md", "lg", "xl"],
+          "description": "Physical size of the button"
+        },
+        "tag": {
+          "type": "string",
+          "default": "button",
+          "options": ["button", "a", "NuxtLink"],
+          "description": "HTML tag or component to render"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disabled state"
+        },
+        "loading": {
+          "type": "boolean",
+          "default": false,
+          "description": "Loading state with spinner"
+        },
+        "fullWidth": {
+          "type": "boolean",
+          "default": false,
+          "description": "Makes button take full width of container"
+        },
+        "rounded": {
+          "type": "string",
+          "default": "md",
+          "options": ["none", "sm", "md", "lg", "full"],
+          "description": "Border radius variation"
+        }
+      },
+      "slots": {
+        "default": "Button content text",
+        "icon-left": "Icon slot for left side of button",
+        "icon-right": "Icon slot for right side of button"
+      },
+      "events": {
+        "click": "Emitted when button is clicked"
+      },
+      "examples": [
+        "<Button variant=\"primary\">Primary Action</Button>",
+        "<Button variant=\"outline\" size=\"lg\">Large Outline</Button>",
+        "<Button loading>Processing...</Button>"
+      ],
+      "storybook": "stories/Components/Button.stories.ts"
+    },
+    "AppHeader": {
+      "location": "src/components/Layout/AppHeader.vue",
+      "description": "Application header with responsive navigation and mobile menu",
+      "category": "Layout",
+      "props": {
+        "title": {
+          "type": "string",
+          "default": "My App",
+          "description": "Application title displayed in header"
+        },
+        "navigationItems": {
+          "type": "array",
+          "default": "[{ name: 'Home', href: '/' }]",
+          "description": "Array of navigation menu items"
+        }
+      },
+      "features": [
+        "Responsive design with mobile hamburger menu",
+        "Configurable navigation items",
+        "Accessible keyboard navigation",
+        "Mobile-first approach"
+      ],
+      "examples": [
+        "<AppHeader title=\"My App\" :navigation-items=\"navItems\" />"
+      ],
+      "storybook": "stories/Layout/AppHeader.stories.ts"
+    },
+    "AppFooter": {
+      "location": "src/components/Layout/AppFooter.vue",
+      "description": "Application footer with company info, links, and social media",
+      "category": "Layout",
+      "props": {
+        "companyName": {
+          "type": "string",
+          "default": "My Company",
+          "description": "Company name displayed in footer"
+        },
+        "description": {
+          "type": "string",
+          "default": "Making the world better...",
+          "description": "Company description"
+        },
+        "linkSections": {
+          "type": "array",
+          "default": "[]",
+          "description": "Array of link sections with titles and links"
+        },
+        "copyrightText": {
+          "type": "string",
+          "default": "© 2024 My Company",
+          "description": "Copyright text"
+        }
+      },
+      "features": [
+        "Responsive grid layout",
+        "Configurable link sections",
+        "Social media links support",
+        "Automatic copyright year"
+      ],
+      "storybook": "stories/Layout/AppFooter.stories.ts"
+    },
+    "AppMain": {
+      "location": "src/components/Layout/AppMain.vue",
+      "description": "Main content area with configurable container and styling options",
+      "category": "Layout",
+      "props": {
+        "container": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to use container with max-width"
+        },
+        "padding": {
+          "type": "string",
+          "default": "md",
+          "options": ["none", "sm", "md", "lg", "xl"],
+          "description": "Vertical padding size"
+        },
+        "background": {
+          "type": "string",
+          "default": "white",
+          "options": ["white", "gray", "transparent"],
+          "description": "Background color"
+        }
+      },
+      "features": [
+        "Flexible container system",
+        "Multiple padding options",
+        "Background color variations",
+        "Responsive design"
+      ],
+      "storybook": "stories/Layout/AppMain.stories.ts"
+    }
+  },
+  "patterns": {
+    "fullPageLayout": {
+      "description": "Complete page layout using header, main, and footer components",
+      "example": "<AppHeader /><AppMain><slot /></AppMain><AppFooter />",
+      "components": ["AppHeader", "AppMain", "AppFooter"]
+    },
+    "buttonPatterns": {
+      "description": "Common button usage patterns and combinations",
+      "examples": [
+        "Primary + Secondary button pairs",
+        "Icon buttons with consistent spacing",
+        "Loading states for async actions",
+        "Full-width buttons in forms"
+      ]
+    }
+  },
+  "guidelines": {
+    "colorUsage": {
+      "primary": "Use for main actions and brand elements",
+      "secondary": "Use for less prominent actions",
+      "semantic": "Use success/warning/error for feedback and status",
+      "text": "Use semantic text colors for proper contrast"
+    },
+    "typographyUsage": {
+      "headings": "Use h1-h6 text styles for content hierarchy",
+      "body": "Use body styles for readable content",
+      "ui": "Use button/label/caption for interface elements"
+    },
+    "buttonUsage": {
+      "primary": "One primary button per section for main action",
+      "secondary": "Supporting actions, less visual weight",
+      "outline": "Alternative actions, minimal visual impact",
+      "sizes": "Match button size to importance and context"
+    },
+    "layoutUsage": {
+      "header": "Consistent navigation across all pages",
+      "main": "Use container for content, full-width for heroes",
+      "footer": "Include on all pages for navigation and legal info"
+    }
+  },
+  "storybookIntegration": {
+    "designTokenStories": [
+      "stories/DesignTokens/Colors.stories.ts",
+      "stories/DesignTokens/Typography.stories.ts"
+    ],
+    "componentStories": [
+      "stories/Components/Button.stories.ts",
+      "stories/Layout/AppHeader.stories.ts",
+      "stories/Layout/AppFooter.stories.ts",
+      "stories/Layout/AppMain.stories.ts"
+    ],
+    "addons": [
+      "@storybook/addon-docs",
+      "@storybook/addon-a11y",
+      "@storybook/addon-mcp"
+    ]
+  },
+  "tools": {
+    "buildSystem": "Vite",
+    "framework": "Nuxt 3",
+    "styling": "Tailwind CSS",
+    "documentation": "Storybook 9",
+    "typeScript": true
+  },
+  "accessibility": {
+    "colorContrast": "All colors meet WCAG AA standards",
+    "keyboardNavigation": "All interactive elements support keyboard navigation",
+    "screenReaders": "Proper ARIA labels and semantic HTML",
+    "focusManagement": "Visible focus indicators on all controls"
+  }
+}

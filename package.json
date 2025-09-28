@@ -8,8 +8,6 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && husky install",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "lint": "eslint --ext .vue,.ts,.js .",
     "lint:fix": "eslint --ext .vue,.ts,.js . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,css,scss,json,md}\"",
@@ -21,17 +19,21 @@
     "lh:clean": "node scripts/lighthouse-manager.js clean",
     "lh:cleanAll": "node scripts/lighthouse-manager.js clean all",
     "ci": "yarn lh:clean && yarn lh",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^4.1.0",
+    "@chromatic-com/storybook": "^4.1.1",
     "@lhci/cli": "^0.14.0",
     "@nuxt/devtools": "^1.0.3",
     "@nuxt/typescript-build": "^3.0.2",
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
+    "@nuxtjs/storybook": "^9.0.1",
     "@nuxtjs/tailwindcss": "^6.12.0",
-    "@storybook/addon-links": "^9.1.1",
-    "@storybook/vue3-vite": "^9.1.1",
+    "@storybook/addon-a11y": "^9.1.8",
+    "@storybook/addon-docs": "^9.1.8",
+    "@storybook/addon-vitest": "^9.1.8",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vue/compiler-sfc": "^3.4.21",
@@ -43,13 +45,14 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^16.0.0",
     "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-storybook": "^9.1.8",
     "eslint-plugin-vue": "^9.24.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "nuxt": "^3.8.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
-    "storybook": "^9.1.1",
+    "storybook": "^9.1.8",
     "typescript": "~5.3.3",
     "vite": "^7.1.1",
     "vue": "^3.5.18",
@@ -64,7 +67,6 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "dependencies": {},
   "lint-staged": {
     "*.{js,ts,vue}": [
       "eslint --fix",
@@ -73,5 +75,8 @@
     "*.{js,ts,vue,css,scss,json,md}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@storybook/addon-mcp": "^0.0.4"
   }
 }
