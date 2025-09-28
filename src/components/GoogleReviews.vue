@@ -250,8 +250,10 @@ interface Props {
   apiKey: string
   /**
    * CORSプロキシのURL（オプション）
+   * モバイル対応: allorigins.winまたはproxy.cors.shを推奨
+   * デスクトップ: corsproxy.ioも利用可能
    * 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
-   * 開発環境では環境変数 NUXT_PUBLIC_CORS_PROXY で設定可能
+   * 環境変数 NUXT_PUBLIC_CORS_PROXY で設定可能
    */
   corsProxy?: string
   minRating?: number
@@ -312,30 +314,76 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
       `&language=${props.language}` +
       `&reviews_sort=newest`
 
-    // より信頼性の高いCORSプロキシを使用
+    // モバイル対応のCORSプロキシを使用
     let proxyUrl = targetUrl
+    let proxyMethod = 'direct'
+
     if (props.corsProxy) {
       proxyUrl = props.corsProxy + targetUrl
+      proxyMethod = 'custom'
     } else {
-      // 複数のCORSプロキシを試す
+      // モバイル対応のCORSプロキシリストを試す（信頼性の高い順）
       const corsProxies = [
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
-        `https://thingproxy.freeboard.io/fetch/${targetUrl}`,
+        {
+          url: `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+          method: 'allorigins',
+          mobileSupport: true,
+        },
+        {
+          url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+          method: 'corsproxy',
+          mobileSupport: false,
+        },
+        {
+          url: `https://proxy.cors.sh/${targetUrl}`,
+          method: 'cors_sh',
+          mobileSupport: true,
+        },
       ]
-      proxyUrl = corsProxies[0] // 最初のプロキシを使用
+
+      // デバイス検出
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        )
+
+      // モバイルの場合はモバイル対応のプロキシを優先
+      const selectedProxy = isMobile
+        ? corsProxies.find(p => p.mobileSupport) || corsProxies[0]
+        : corsProxies[0]
+
+      proxyUrl = selectedProxy.url
+      proxyMethod = selectedProxy.method
+    }
+
+    // デバイス検出とヘッダー最適化
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+
+    // モバイル対応のリクエストヘッダーを作成
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    }
+
+    // モバイルの場合はヘッダーを最小限に
+    if (!isMobile) {
+      headers['Content-Type'] = 'application/json'
+      headers.Origin = window.location.origin
+    }
+
+    // 一部のCORSプロキシでは特定のヘッダーが必要
+    if (proxyMethod === 'allorigins') {
+      headers['X-Requested-With'] = 'XMLHttpRequest'
     }
 
     const response = await fetch(proxyUrl, {
       method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Origin: window.location.origin,
-        'User-Agent': navigator.userAgent,
-      },
+      headers,
       mode: 'cors',
       credentials: 'omit',
+      cache: 'no-cache',
     })
 
     if (!response.ok) {
@@ -344,18 +392,16 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
 
     let data: GooglePlacesResponse
 
-    // 複数のCORSプロキシに対応したレスポンス処理
-    if (!props.corsProxy) {
-      if (proxyUrl.includes('allorigins.win')) {
-        const proxyResponse = await response.json()
-        data = JSON.parse(proxyResponse.contents)
-      } else if (proxyUrl.includes('corsproxy.io')) {
-        data = await response.json()
-      } else if (proxyUrl.includes('thingproxy.freeboard.io')) {
-        data = await response.json()
-      } else {
-        data = await response.json()
-      }
+    // プロキシメソッドに基づいたレスポンス処理
+    if (proxyMethod === 'allorigins') {
+      const proxyResponse = await response.json()
+      data = JSON.parse(proxyResponse.contents)
+    } else if (
+      proxyMethod === 'corsproxy' ||
+      proxyMethod === 'cors_sh' ||
+      proxyMethod === 'custom'
+    ) {
+      data = await response.json()
     } else {
       data = await response.json()
     }
@@ -373,23 +419,36 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
 
     filterAndDisplayReviews()
   } catch (err) {
-    // リトライ機能（最大2回まで）
-    if (retryCount < 2) {
+    console.warn(
+      `Google Places API request failed (attempt ${retryCount + 1}):`,
+      err
+    )
+
+    // より積極的なリトライ機能（最大3回、異なるプロキシを試す）
+    if (retryCount < 3) {
       setTimeout(
         () => {
           fetchReviews(retryCount + 1)
         },
         1000 * (retryCount + 1)
-      ) // 1秒、2秒の間隔でリトライ
+      ) // 1秒、2秒、3秒の間隔でリトライ
       return
     }
 
     // 最終的に失敗した場合はモックデータを使用
-    console.warn('Google Places API failed, using mock data:', err)
+    console.warn('All Google Places API attempts failed, using mock data:', err)
     currentReviews.value = mockReviews
     businessInfo.value = mockBusinessInfo
     filterAndDisplayReviews()
-    error.value = 'API接続に問題があります。サンプルデータを表示しています。'
+
+    // デバイス別のエラーメッセージ
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    error.value = isMobile
+      ? 'モバイル環境での接続に問題があります。お客様の声をサンプルデータで表示しています。'
+      : 'API接続に問題があります。サンプルデータを表示しています。'
   } finally {
     isLoading.value = false
   }
