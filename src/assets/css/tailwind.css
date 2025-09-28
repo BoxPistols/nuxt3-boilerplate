@@ -4,15 +4,37 @@
 
 html,
 body {
-  font-family: 'Nunito', sans-serif;
-  background-color: #0f172a;
-  color: #ffffff;
+  font-family:
+    'Inter',
+    'Nunito',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 a {
   transition: color 0.3s ease;
+  color: #1d4ed8;
 }
 
 a:hover {
-  color: #38bdf8;
+  color: #1e40af;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }

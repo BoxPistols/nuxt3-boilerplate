@@ -89,4 +89,14 @@ export default defineNuxtConfig({
 
   modules: ['@nuxtjs/tailwindcss'],
   compatibilityDate: '2024-08-12',
+
+  runtimeConfig: {
+    public: {
+      googlePlacesApiKey: process.env.NUXT_PUBLIC_GOOGLE_PLACES_API_KEY,
+      googlePlaceId: process.env.NUXT_PUBLIC_GOOGLE_PLACE_ID,
+      // CORSプロキシは環境変数で設定してください
+      // 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
+      corsProxy: process.env.NUXT_PUBLIC_CORS_PROXY || '',
+    },
+  },
 })
