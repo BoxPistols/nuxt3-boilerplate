@@ -94,7 +94,7 @@ export default defineNuxtConfig({
     public: {
       googlePlacesApiKey: process.env.NUXT_PUBLIC_GOOGLE_PLACES_API_KEY || '',
       googlePlaceId: process.env.NUXT_PUBLIC_GOOGLE_PLACE_ID || '',
-      corsProxy: process.env.NUXT_PUBLIC_CORS_PROXY || '',
+      corsProxy: process.env.NUXT_PUBLIC_CORS_PROXY || 'https://corsproxy.io/?',
     },
   },
 })

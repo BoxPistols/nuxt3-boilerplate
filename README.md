@@ -85,3 +85,23 @@ Lighthouse CIを使用してウェブパフォーマンス、アクセシビリ�
 ### 貢献
 
 変更時は必ずテストし、レビューを依頼してください。
+
+---
+
+## 📚 学習ドキュメント
+
+このプロジェクトで使用されている技術の学習リソース：
+
+- **[STUDY.md](./STUDY.md)** - 学習ドキュメント一覧
+- **[SECURITY_GUIDE.md](./SECURITY_GUIDE.md)** - セキュリティガイド
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - デプロイメントガイド
+- **[aws-nginx-setup.md](./aws-nginx-setup.md)** - AWS + NGINX設定
+
+### 技術スタック学習
+
+- **Nuxt 3** - Vue.jsフレームワーク
+- **TypeScript** - 型安全なJavaScript
+- **Tailwind CSS** - ユーティリティファーストCSS
+- **Vercel** - 静的サイトホスティング
+- **AWS** - クラウドインフラ
+- **NGINX** - Webサーバー・リバースプロキシ

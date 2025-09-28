@@ -284,7 +284,7 @@ const imageLoading = ref<Record<number, boolean>>({})
 const reviewsScrollWrapper = ref<HTMLElement | null>(null)
 
 // Methods
-const fetchReviews = async (): Promise<void> => {
+const fetchReviews = async (retryCount = 0): Promise<void> => {
   isLoading.value = true
   error.value = null
 
@@ -312,20 +312,30 @@ const fetchReviews = async (): Promise<void> => {
       `&language=${props.language}` +
       `&reviews_sort=newest`
 
-    // CORSプロキシが設定されている場合のみ使用
-    // 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
+    // より信頼性の高いCORSプロキシを使用
     let proxyUrl = targetUrl
     if (props.corsProxy) {
       proxyUrl = props.corsProxy + targetUrl
     } else {
-      // 代替のCORSプロキシを試す
-      proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
+      // 複数のCORSプロキシを試す
+      const corsProxies = [
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+        `https://thingproxy.freeboard.io/fetch/${targetUrl}`,
+      ]
+      proxyUrl = corsProxies[0] // 最初のプロキシを使用
     }
 
     const response = await fetch(proxyUrl, {
+      method: 'GET',
       headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
         Origin: window.location.origin,
+        'User-Agent': navigator.userAgent,
       },
+      mode: 'cors',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -334,10 +344,18 @@ const fetchReviews = async (): Promise<void> => {
 
     let data: GooglePlacesResponse
 
-    // 代替CORSプロキシを使用している場合のレスポンス処理
-    if (!props.corsProxy && proxyUrl.includes('allorigins.win')) {
-      const proxyResponse = await response.json()
-      data = JSON.parse(proxyResponse.contents)
+    // 複数のCORSプロキシに対応したレスポンス処理
+    if (!props.corsProxy) {
+      if (proxyUrl.includes('allorigins.win')) {
+        const proxyResponse = await response.json()
+        data = JSON.parse(proxyResponse.contents)
+      } else if (proxyUrl.includes('corsproxy.io')) {
+        data = await response.json()
+      } else if (proxyUrl.includes('thingproxy.freeboard.io')) {
+        data = await response.json()
+      } else {
+        data = await response.json()
+      }
     } else {
       data = await response.json()
     }
@@ -355,8 +373,23 @@ const fetchReviews = async (): Promise<void> => {
 
     filterAndDisplayReviews()
   } catch (err) {
-    error.value =
-      err instanceof Error ? err.message : '不明なエラーが発生しました'
+    // リトライ機能（最大2回まで）
+    if (retryCount < 2) {
+      setTimeout(
+        () => {
+          fetchReviews(retryCount + 1)
+        },
+        1000 * (retryCount + 1)
+      ) // 1秒、2秒の間隔でリトライ
+      return
+    }
+
+    // 最終的に失敗した場合はモックデータを使用
+    console.warn('Google Places API failed, using mock data:', err)
+    currentReviews.value = mockReviews
+    businessInfo.value = mockBusinessInfo
+    filterAndDisplayReviews()
+    error.value = 'API接続に問題があります。サンプルデータを表示しています。'
   } finally {
     isLoading.value = false
   }
