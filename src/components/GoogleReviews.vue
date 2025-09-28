@@ -123,66 +123,70 @@
         </div>
 
         <!-- フォールバック表示（エラー時はモックレビューを表示） -->
-        <div v-if="error && mockReviews.length > 0" class="reviews-display">
+        <div v-if="error && mockReviews.length > 0">
           <div class="fallback-notice">
             <p>おかげさまでお客様にご好評いただいております</p>
           </div>
-          <div
-            v-for="(review, index) in mockReviews"
-            :key="`mock-${review.time}`"
-            class="review-card"
-            :class="[
-              review.rating === 5 ? 'perfect-rating' : 'high-rating',
-              'fade-in',
-            ]"
-            :style="{ animationDelay: `${index * 0.1}s` }"
-          >
-            <div class="review-header">
-              <div class="avatar-container">
-                <div class="avatar-fallback">
-                  {{ getInitials(review.author_name) }}
+          <div class="reviews-display">
+            <div
+              v-for="(review, index) in mockReviews"
+              :key="`mock-${review.time}`"
+              class="review-card"
+              :class="[
+                review.rating === 5 ? 'perfect-rating' : 'high-rating',
+                'fade-in',
+              ]"
+              :style="{ animationDelay: `${index * 0.1}s` }"
+            >
+              <div class="review-header">
+                <div class="avatar-container">
+                  <div class="avatar-fallback">
+                    {{ getInitials(review.author_name) }}
+                  </div>
                 </div>
-              </div>
-              <div class="author-info">
-                <div class="author-name">
-                  {{ review.author_name }}
-                  <span class="job-title">{{ review.job_title }}</span>
-                </div>
-                <div class="review-rating">
-                  <span class="rating-stars">{{
-                    generateStars(review.rating)
-                  }}</span>
-                </div>
-                <div class="professional-info">
-                  <div class="age-info">年代：{{ review.age }}</div>
-                  <div class="income-info">
-                    月収：{{ review.monthly_income }}
+                <div class="author-info">
+                  <div class="author-name">
+                    {{ review.author_name }}
+                    <span class="job-title">{{ review.job_title }}</span>
+                  </div>
+                  <div class="review-rating">
+                    <span class="rating-stars">{{
+                      generateStars(review.rating)
+                    }}</span>
+                  </div>
+                  <div class="professional-info">
+                    <div class="age-info">年代：{{ review.age }}</div>
+                    <div class="income-info">
+                      月収：{{ review.monthly_income }}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="review-content">
-              <div
-                class="review-text"
-                :class="{
-                  truncated:
-                    isLongText(review.text) && !expandedReviews[review.time],
-                }"
-              >
-                {{
-                  expandedReviews[review.time]
-                    ? review.text
-                    : truncateText(review.text)
-                }}
+              <div class="review-content">
+                <div
+                  class="review-text"
+                  :class="{
+                    truncated:
+                      isLongText(review.text) && !expandedReviews[review.time],
+                  }"
+                >
+                  {{
+                    expandedReviews[review.time]
+                      ? review.text
+                      : truncateText(review.text)
+                  }}
+                </div>
+                <button
+                  v-if="isLongText(review.text)"
+                  class="read-more-btn"
+                  @click="toggleExpanded(review.time)"
+                >
+                  {{
+                    expandedReviews[review.time] ? '折りたたむ' : 'もっと見る'
+                  }}
+                </button>
               </div>
-              <button
-                v-if="isLongText(review.text)"
-                class="read-more-btn"
-                @click="toggleExpanded(review.time)"
-              >
-                {{ expandedReviews[review.time] ? '折りたたむ' : 'もっと見る' }}
-              </button>
             </div>
           </div>
         </div>
@@ -440,11 +444,6 @@ const calculateRelativeTime = (timestamp: number): string => {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  fetchReviews()
-})
-
 // Touch events for mobile
 const setupTouchEvents = (): void => {
   if (typeof window === 'undefined') return
@@ -482,7 +481,9 @@ const setupTouchEvents = (): void => {
   })
 }
 
+// Lifecycle
 onMounted(() => {
+  fetchReviews()
   setupTouchEvents()
 })
 </script>
@@ -1003,5 +1004,48 @@ onMounted(() => {
   border-top: 2px solid #1a73e8;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.fallback-notice {
+  text-align: center;
+  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  border: 1px solid #c8e6c8;
+  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.1);
+}
+
+.fallback-notice p {
+  color: #2e7d32;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.job-title {
+  display: inline-block;
+  background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+  color: #1565c0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  border: 1px solid #bbdefb;
+}
+
+.professional-info {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+
+.age-info,
+.income-info {
+  color: #5f6368;
+  font-weight: 400;
 }
 </style>
