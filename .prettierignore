@@ -5,6 +5,13 @@ coverage
 .output
 dist
 
+# Storybook build output
+storybook-static
+
+# Lighthouse CI artifacts
+.lighthouseci
+lighthouse-results
+
 # Ignore all HTML files:
 *.html
 

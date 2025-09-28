@@ -11,12 +11,12 @@ module.exports = {
   ci: {
     collect: {
       staticDistDir: '.output/public',
+      // CIではstartServerCommandでローカルサーバを立ち上げ、URLはlocalhostを使う
       url: ['http://localhost:3000'],
-      // url: [`${BASE_URL}/`],
       startServerCommand: 'npx serve -p 3000 .output/public',
-      // startServerCommand: 'node .output/server/index.mjs',
-      startServerReadyPattern: 'Listening on',
-      maxWaitForLoad: 60000,
+      // serveの標準出力に合わせて準備完了パターンを調整
+      startServerReadyPattern: 'accepting connections',
+      maxWaitForLoad: 90000,
       numberOfRuns: 1,
       settings: {
         chromeFlags: [

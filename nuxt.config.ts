@@ -66,6 +66,20 @@ export default defineNuxtConfig({
         },
       ],
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+      script: [
+        {
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-XV7FEM7FG0',
+          async: true,
+        },
+        {
+          innerHTML: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XV7FEM7FG0');
+          `,
+        },
+      ],
     },
   },
   nitro: {
