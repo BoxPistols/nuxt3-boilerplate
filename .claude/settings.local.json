@@ -24,7 +24,10 @@
       "Bash(yarn install:*)",
       "mcp__chrome-devtools__take_screenshot",
       "mcp__chrome-devtools__evaluate_script",
-      "mcp__chrome-devtools__wait_for"
+      "mcp__chrome-devtools__wait_for",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__list_pages"
     ],
     "deny": []
   }
