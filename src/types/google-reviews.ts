@@ -39,3 +39,9 @@ export interface ReviewStats {
   averageRating: number
   highRatingCount: number
 }
+
+export interface MockReview extends GoogleReview {
+  job_title: string
+  age: string
+  monthly_income: string
+}
