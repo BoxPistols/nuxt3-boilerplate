@@ -1,4 +1,10 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "buildCommand": "yarn build",
+  "outputDirectory": "dist",
+  "framework": "nuxtjs",
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

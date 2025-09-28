@@ -288,6 +288,21 @@ const fetchReviews = async (): Promise<void> => {
   isLoading.value = true
   error.value = null
 
+  // 環境変数の検証
+  if (!props.apiKey) {
+    error.value =
+      'Google Places APIキーが設定されていません。環境変数 NUXT_PUBLIC_GOOGLE_PLACES_API_KEY を確認してください。'
+    isLoading.value = false
+    return
+  }
+
+  if (!props.placeId) {
+    error.value =
+      'Google Place IDが設定されていません。環境変数 NUXT_PUBLIC_GOOGLE_PLACE_ID を確認してください。'
+    isLoading.value = false
+    return
+  }
+
   try {
     const targetUrl =
       `https://maps.googleapis.com/maps/api/place/details/json` +
@@ -299,7 +314,14 @@ const fetchReviews = async (): Promise<void> => {
 
     // CORSプロキシが設定されている場合のみ使用
     // 本番環境では自己ホスト型のCORSプロキシまたは堅牢なサービスを使用することを推奨
-    const proxyUrl = props.corsProxy ? props.corsProxy + targetUrl : targetUrl
+    let proxyUrl = targetUrl
+    if (props.corsProxy) {
+      proxyUrl = props.corsProxy + targetUrl
+    } else {
+      // 代替のCORSプロキシを試す
+      proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
+    }
+
     const response = await fetch(proxyUrl, {
       headers: {
         Origin: window.location.origin,
@@ -310,7 +332,15 @@ const fetchReviews = async (): Promise<void> => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data: GooglePlacesResponse = await response.json()
+    let data: GooglePlacesResponse
+
+    // 代替CORSプロキシを使用している場合のレスポンス処理
+    if (!props.corsProxy && proxyUrl.includes('allorigins.win')) {
+      const proxyResponse = await response.json()
+      data = JSON.parse(proxyResponse.contents)
+    } else {
+      data = await response.json()
+    }
 
     if (data.status !== 'OK') {
       throw new Error(`Google API Error: ${data.status}`)
@@ -325,7 +355,6 @@ const fetchReviews = async (): Promise<void> => {
 
     filterAndDisplayReviews()
   } catch (err) {
-    console.error('Error fetching reviews:', err)
     error.value =
       err instanceof Error ? err.message : '不明なエラーが発生しました'
   } finally {
