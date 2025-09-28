@@ -221,9 +221,9 @@
       </div>
 
       <!-- Googleレビューリンク -->
-      <div class="google-reviews-link">
+      <div v-if="props.showMoreReviewsLink" class="google-reviews-link">
         <a
-          href="https://share.google/o0NUxpGtlW8mg9N3r"
+          :href="props.googleReviewsUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="view-more-reviews-btn"
@@ -251,12 +251,16 @@ interface Props {
   corsProxy?: string
   minRating?: number
   language?: string
+  googleReviewsUrl?: string
+  showMoreReviewsLink?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   corsProxy: 'https://cors-anywhere.herokuapp.com/',
   minRating: 4,
   language: 'ja',
+  googleReviewsUrl: 'https://share.google/o0NUxpGtlW8mg9N3r',
+  showMoreReviewsLink: true,
 })
 
 // Reactive data
