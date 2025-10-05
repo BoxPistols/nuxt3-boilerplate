@@ -779,8 +779,13 @@ onMounted(() => {
     width: 280px;
     min-width: 280px;
     max-width: 280px;
-    max-height: 280px;
+    height: 320px;
+    max-height: 320px;
     flex-shrink: 0;
+  }
+
+  .review-content {
+    max-height: 200px;
   }
 }
 
@@ -794,10 +799,11 @@ onMounted(() => {
   border: 1px solid var(--border-color);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: visible;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  max-height: 400px;
+  overflow: hidden;
 }
 
 .review-card::before {
@@ -888,6 +894,27 @@ onMounted(() => {
   position: relative;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  max-height: 280px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.review-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.review-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.review-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.review-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .review-text {
