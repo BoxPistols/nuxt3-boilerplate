@@ -356,10 +356,14 @@ const fetchReviews = async (
           navigator.userAgent
         )
 
-      // モバイルの場合はモバイル対応のプロキシを優先
-      const selectedProxy = isMobile
-        ? corsProxies.find(p => p.mobileSupport) || corsProxies[0]
-        : corsProxies[0]
+      // リトライごとに異なるプロキシを試す
+      // モバイルの場合はモバイル対応のプロキシのみを使用
+      const availableProxies = isMobile
+        ? corsProxies.filter(p => p.mobileSupport)
+        : corsProxies
+
+      const proxyIndex = retryCount % availableProxies.length
+      const selectedProxy = availableProxies[proxyIndex]
 
       proxyUrl = selectedProxy.url
       proxyMethod = selectedProxy.method
@@ -449,7 +453,8 @@ const deduplicateReviews = (reviews: GoogleReview[]): GoogleReview[] => {
   const seen = new Set<string>()
   return reviews.filter(review => {
     // author_nameとtimeを組み合わせた複合キーで重複排除
-    const key = `${review.author_name}-${review.time}`
+    // JSON.stringifyを使用してキーの衝突を防ぐ
+    const key = JSON.stringify([review.author_name, review.time])
     if (seen.has(key)) {
       return false
     }
