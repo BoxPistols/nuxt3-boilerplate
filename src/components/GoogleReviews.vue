@@ -119,7 +119,7 @@
         <!-- ローディング状態 -->
         <div v-if="isLoading" class="loading">
           <div class="loading-spinner"></div>
-          <p>高評価レビューを読み込んでいます...</p>
+          <p>お客様レビューを読み込んでいます...</p>
         </div>
 
         <!-- フォールバック表示（エラー時はモックレビューを表示） -->
@@ -285,24 +285,33 @@ const imageLoading = ref<Record<number, boolean>>({})
 // DOM要素の参照
 const reviewsScrollWrapper = ref<HTMLElement | null>(null)
 
-// Methods
-const fetchReviews = async (retryCount = 0): Promise<void> => {
-  isLoading.value = true
-  error.value = null
+// Constants
+const MAX_RETRY_COUNT = 3
+const API_TIMEOUT_MS = 30000
+const MAX_REVIEWS_TO_DISPLAY = 8
+const RETRY_DELAY_BASE_MS = 1000
 
+// Helper functions
+const calculateRetryDelay = (retryCount: number): number => {
+  return RETRY_DELAY_BASE_MS * (retryCount + 1)
+}
+
+// Methods
+const fetchReviews = async (
+  sortOrder: 'newest' | 'most_relevant' = 'newest',
+  retryCount = 0
+): Promise<{ reviews: GoogleReview[]; businessInfo: BusinessInfo | null }> => {
   // 環境変数の検証
   if (!props.apiKey) {
-    error.value =
+    throw new Error(
       'Google Places APIキーが設定されていません。環境変数 NUXT_PUBLIC_GOOGLE_PLACES_API_KEY を確認してください。'
-    isLoading.value = false
-    return
+    )
   }
 
   if (!props.placeId) {
-    error.value =
+    throw new Error(
       'Google Place IDが設定されていません。環境変数 NUXT_PUBLIC_GOOGLE_PLACE_ID を確認してください。'
-    isLoading.value = false
-    return
+    )
   }
 
   try {
@@ -312,7 +321,7 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
       `&key=${props.apiKey}` +
       `&fields=reviews,rating,user_ratings_total,name` +
       `&language=${props.language}` +
-      `&reviews_sort=newest`
+      `&reviews_sort=${sortOrder}`
 
     // モバイル対応のCORSプロキシを使用
     let proxyUrl = targetUrl
@@ -347,10 +356,14 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
           navigator.userAgent
         )
 
-      // モバイルの場合はモバイル対応のプロキシを優先
-      const selectedProxy = isMobile
-        ? corsProxies.find(p => p.mobileSupport) || corsProxies[0]
-        : corsProxies[0]
+      // リトライごとに異なるプロキシを試す
+      // モバイルの場合はモバイル対応のプロキシのみを使用
+      const availableProxies = isMobile
+        ? corsProxies.filter(p => p.mobileSupport)
+        : corsProxies
+
+      const proxyIndex = retryCount % availableProxies.length
+      const selectedProxy = availableProxies[proxyIndex]
 
       proxyUrl = selectedProxy.url
       proxyMethod = selectedProxy.method
@@ -410,33 +423,100 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
       throw new Error(`Google API Error: ${data.status}`)
     }
 
-    currentReviews.value = data.result.reviews || []
-    businessInfo.value = {
-      name: data.result.name,
-      rating: data.result.rating,
-      user_ratings_total: data.result.user_ratings_total,
+    return {
+      reviews: data.result.reviews || [],
+      businessInfo: {
+        name: data.result.name,
+        rating: data.result.rating,
+        user_ratings_total: data.result.user_ratings_total,
+      },
     }
-
-    filterAndDisplayReviews()
   } catch (err) {
     console.warn(
-      `Google Places API request failed (attempt ${retryCount + 1}):`,
+      `Google Places API request failed (${sortOrder}, attempt ${retryCount + 1}):`,
       err
     )
 
-    // より積極的なリトライ機能（最大3回、異なるプロキシを試す）
-    if (retryCount < 3) {
-      setTimeout(
-        () => {
-          fetchReviews(retryCount + 1)
-        },
-        1000 * (retryCount + 1)
-      ) // 1秒、2秒、3秒の間隔でリトライ
-      return
+    // より積極的なリトライ機能（最大MAX_RETRY_COUNT回、異なるプロキシを試す）
+    if (retryCount < MAX_RETRY_COUNT) {
+      await new Promise(resolve =>
+        setTimeout(resolve, calculateRetryDelay(retryCount))
+      )
+      return fetchReviews(sortOrder, retryCount + 1)
     }
 
-    // 最終的に失敗した場合はモックデータを使用
-    console.warn('All Google Places API attempts failed, using mock data:', err)
+    throw err
+  }
+}
+
+const deduplicateReviews = (reviews: GoogleReview[]): GoogleReview[] => {
+  const seen = new Set<string>()
+  return reviews.filter(review => {
+    // author_nameとtimeを組み合わせた複合キーで重複排除
+    // JSON.stringifyを使用してキーの衝突を防ぐ
+    const key = JSON.stringify([review.author_name, review.time])
+    if (seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+    return true
+  })
+}
+
+const fetchAllReviews = async (): Promise<void> => {
+  isLoading.value = true
+  error.value = null
+
+  // AbortControllerでタイムアウトとクリーンアップを管理
+  const abortController = new AbortController()
+  const timeoutId = setTimeout(() => {
+    abortController.abort()
+  }, API_TIMEOUT_MS)
+
+  try {
+    // 並列で2回APIリクエスト（異なるソート順）
+    const [newestResult, relevantResult] = await Promise.all([
+      fetchReviews('newest').catch(err => {
+        console.warn('Newest reviews fetch failed:', err)
+        return { reviews: [], businessInfo: null }
+      }),
+      fetchReviews('most_relevant').catch(err => {
+        console.warn('Most relevant reviews fetch failed:', err)
+        return { reviews: [], businessInfo: null }
+      }),
+    ])
+
+    // タイムアウトをクリア
+    clearTimeout(timeoutId)
+
+    // ビジネス情報を設定（どちらか一方から取得）
+    businessInfo.value =
+      newestResult.businessInfo || relevantResult.businessInfo || null
+
+    // 全レビューをマージして重複排除
+    const allReviews = deduplicateReviews([
+      ...newestResult.reviews,
+      ...relevantResult.reviews,
+    ])
+
+    // 少なくとも1件でも取得できた場合
+    if (allReviews.length > 0) {
+      currentReviews.value = allReviews
+      filterAndDisplayReviews()
+    } else {
+      // 完全に失敗した場合はモックデータを使用
+      throw new Error('Both API requests failed')
+    }
+  } catch (err) {
+    // タイムアウトをクリア
+    clearTimeout(timeoutId)
+
+    const isAborted = abortController.signal.aborted
+    const errorMessage = isAborted
+      ? 'リクエストがタイムアウトしました。'
+      : 'API接続に問題があります。'
+
+    console.warn(`${errorMessage} Using mock data:`, err)
     currentReviews.value = mockReviews
     businessInfo.value = mockBusinessInfo
     filterAndDisplayReviews()
@@ -448,7 +528,7 @@ const fetchReviews = async (retryCount = 0): Promise<void> => {
       )
     error.value = isMobile
       ? 'モバイル環境での接続に問題があります。お客様の声をサンプルデータで表示しています。'
-      : 'API接続に問題があります。サンプルデータを表示しています。'
+      : `${errorMessage} サンプルデータを表示しています。`
   } finally {
     isLoading.value = false
   }
@@ -458,7 +538,7 @@ const filterAndDisplayReviews = (): void => {
   filteredReviews.value = currentReviews.value
     .filter(review => review.rating >= props.minRating)
     .sort((a, b) => b.time - a.time)
-    .slice(0, 5)
+    .slice(0, MAX_REVIEWS_TO_DISPLAY)
 }
 
 const generateStars = (rating: number): string => {
@@ -574,7 +654,7 @@ const setupTouchEvents = (): void => {
 
 // Lifecycle
 onMounted(() => {
-  fetchReviews()
+  fetchAllReviews() // Lazy loadを無効化して即座に読み込み
   setupTouchEvents()
 })
 </script>
@@ -685,19 +765,26 @@ onMounted(() => {
   overflow: visible;
 }
 
-/* デスクトップ（769px以上）：グリッドレイアウト */
+/* デスクトップ（769px以上）：4列2行グリッドレイアウト */
 .reviews-display {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   padding: 16px 0;
+}
+
+/* タブレット（769px-1024px）：2列グリッド */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .reviews-display {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* モバイル・タブレット（768px以下）：横スクロール */
 @media (max-width: 768px) {
   .reviews-display {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     overflow-x: auto;
     padding: 16px 0 24px 0;
     scroll-behavior: smooth;
@@ -711,25 +798,34 @@ onMounted(() => {
   }
 
   .review-card {
-    width: 320px;
-    min-width: 320px;
-    max-width: 320px;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: 320px;
+    max-height: 320px;
     flex-shrink: 0;
+  }
+
+  .review-content {
+    max-height: 200px;
   }
 }
 
 .review-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 12px;
+  padding: 16px;
   box-shadow:
     0 1px 3px 0 rgba(0, 0, 0, 0.1),
     0 1px 2px 0 rgba(0, 0, 0, 0.06);
   border: 1px solid var(--border-color);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  max-height: 400px;
+  overflow: hidden;
 }
 
 .review-card::before {
@@ -759,13 +855,14 @@ onMounted(() => {
 .review-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .author-avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border-color);
@@ -784,10 +881,10 @@ onMounted(() => {
 }
 
 .author-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .review-rating {
@@ -798,56 +895,73 @@ onMounted(() => {
 }
 
 .review-rating .rating-stars {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #fbbc04;
 }
 
 .rating-number {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .review-date {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-disabled);
 }
 
 .review-content {
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text-primary);
   position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: 280px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.review-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.review-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.review-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.review-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .review-text {
-  font-size: 0.95rem;
-  margin-bottom: 16px;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .review-text.truncated {
-  max-height: 4.8em;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  position: relative;
-}
-
-.review-text.truncated::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 40px;
-  height: 1.2em;
-  background: linear-gradient(to right, transparent, var(--surface-color));
+  text-overflow: ellipsis;
 }
 
 .read-more-btn {
   background: none;
   border: none;
   color: #1a73e8;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 2px 0;
   transition: all 0.2s ease;
   text-decoration: underline;
 }
@@ -1059,14 +1173,14 @@ onMounted(() => {
 /* アバター関連のスタイル */
 .avatar-container {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
 }
 
 .avatar-fallback {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1a73e8, #1557b0);
   color: white;
@@ -1074,7 +1188,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border: 2px solid #e8eaed;
 }
 
@@ -1082,8 +1196,8 @@ onMounted(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;

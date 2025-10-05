@@ -90,6 +90,10 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/storybook'],
   compatibilityDate: '2024-08-12',
 
+  storybook: {
+    enabled: false, // Nuxt dev時のStorybookビルドを無効化
+  },
+
   runtimeConfig: {
     public: {
       googlePlacesApiKey: process.env.NUXT_PUBLIC_GOOGLE_PLACES_API_KEY || '',
