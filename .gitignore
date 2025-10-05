@@ -109,3 +109,6 @@ lighthouse-results/manifest.json
 # Storybook
 storybook-static
 # .storybook設定ファイルはコミットする（除外しない）
+
+# Claude Code
+.claude/settings.local.json

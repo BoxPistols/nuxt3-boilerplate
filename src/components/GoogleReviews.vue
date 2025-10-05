@@ -285,6 +285,11 @@ const imageLoading = ref<Record<number, boolean>>({})
 // DOM要素の参照
 const reviewsScrollWrapper = ref<HTMLElement | null>(null)
 
+// Constants
+const MAX_RETRY_COUNT = 3
+const API_TIMEOUT_MS = 30000
+const MAX_REVIEWS_TO_DISPLAY = 8
+
 // Methods
 const fetchReviews = async (
   sortOrder: 'newest' | 'most_relevant' = 'newest',
@@ -422,8 +427,8 @@ const fetchReviews = async (
       err
     )
 
-    // より積極的なリトライ機能（最大3回、異なるプロキシを試す）
-    if (retryCount < 3) {
+    // より積極的なリトライ機能（最大MAX_RETRY_COUNT回、異なるプロキシを試す）
+    if (retryCount < MAX_RETRY_COUNT) {
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
       return fetchReviews(sortOrder, retryCount + 1)
     }
@@ -433,12 +438,14 @@ const fetchReviews = async (
 }
 
 const deduplicateReviews = (reviews: GoogleReview[]): GoogleReview[] => {
-  const seen = new Set<number>()
+  const seen = new Set<string>()
   return reviews.filter(review => {
-    if (seen.has(review.time)) {
+    // author_nameとtimeを組み合わせた複合キーで重複排除
+    const key = `${review.author_name}-${review.time}`
+    if (seen.has(key)) {
       return false
     }
-    seen.add(review.time)
+    seen.add(key)
     return true
   })
 }
@@ -447,11 +454,11 @@ const fetchAllReviews = async (): Promise<void> => {
   isLoading.value = true
   error.value = null
 
-  // 30秒タイムアウト処理
+  // タイムアウト処理
   const timeoutPromise = new Promise<never>((_resolve, reject) => {
     setTimeout(() => {
-      reject(new Error('API request timeout (30s)'))
-    }, 30000)
+      reject(new Error(`API request timeout (${API_TIMEOUT_MS / 1000}s)`))
+    }, API_TIMEOUT_MS)
   })
 
   try {
@@ -516,7 +523,7 @@ const filterAndDisplayReviews = (): void => {
   filteredReviews.value = currentReviews.value
     .filter(review => review.rating >= props.minRating)
     .sort((a, b) => b.time - a.time)
-    .slice(0, 8) // 7-8件表示を目指す
+    .slice(0, MAX_REVIEWS_TO_DISPLAY)
 }
 
 const generateStars = (rating: number): string => {
