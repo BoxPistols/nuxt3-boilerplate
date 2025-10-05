@@ -34,7 +34,11 @@
       "mcp__chrome-devtools__list_console_messages",
       "mcp__chrome-devtools__list_network_requests",
       "mcp__chrome-devtools__get_network_request",
-      "Bash(npx storybook@latest init:*)"
+      "Bash(npx storybook@latest init:*)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Bash(yarn dev)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

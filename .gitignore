@@ -106,6 +106,6 @@ lighthouse-results/*.json
 # !lighthouse-results/manifest.json
 lighthouse-results/manifest.json
 
+# Storybook
 storybook-static
-
-.storybook
+# .storybook設定ファイルはコミットする（除外しない）
