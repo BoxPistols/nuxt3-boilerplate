@@ -289,6 +289,12 @@ const reviewsScrollWrapper = ref<HTMLElement | null>(null)
 const MAX_RETRY_COUNT = 3
 const API_TIMEOUT_MS = 30000
 const MAX_REVIEWS_TO_DISPLAY = 8
+const RETRY_DELAY_BASE_MS = 1000
+
+// Helper functions
+const calculateRetryDelay = (retryCount: number): number => {
+  return RETRY_DELAY_BASE_MS * (retryCount + 1)
+}
 
 // Methods
 const fetchReviews = async (
@@ -429,7 +435,9 @@ const fetchReviews = async (
 
     // より積極的なリトライ機能（最大MAX_RETRY_COUNT回、異なるプロキシを試す）
     if (retryCount < MAX_RETRY_COUNT) {
-      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+      await new Promise(resolve =>
+        setTimeout(resolve, calculateRetryDelay(retryCount))
+      )
       return fetchReviews(sortOrder, retryCount + 1)
     }
 
@@ -454,28 +462,27 @@ const fetchAllReviews = async (): Promise<void> => {
   isLoading.value = true
   error.value = null
 
-  // タイムアウト処理
-  const timeoutPromise = new Promise<never>((_resolve, reject) => {
-    setTimeout(() => {
-      reject(new Error(`API request timeout (${API_TIMEOUT_MS / 1000}s)`))
-    }, API_TIMEOUT_MS)
-  })
+  // AbortControllerでタイムアウトとクリーンアップを管理
+  const abortController = new AbortController()
+  const timeoutId = setTimeout(() => {
+    abortController.abort()
+  }, API_TIMEOUT_MS)
 
   try {
-    // 並列で2回APIリクエスト（異なるソート順）+ タイムアウト
-    const [newestResult, relevantResult] = await Promise.race([
-      Promise.all([
-        fetchReviews('newest').catch(err => {
-          console.warn('Newest reviews fetch failed:', err)
-          return { reviews: [], businessInfo: null }
-        }),
-        fetchReviews('most_relevant').catch(err => {
-          console.warn('Most relevant reviews fetch failed:', err)
-          return { reviews: [], businessInfo: null }
-        }),
-      ]),
-      timeoutPromise,
+    // 並列で2回APIリクエスト（異なるソート順）
+    const [newestResult, relevantResult] = await Promise.all([
+      fetchReviews('newest').catch(err => {
+        console.warn('Newest reviews fetch failed:', err)
+        return { reviews: [], businessInfo: null }
+      }),
+      fetchReviews('most_relevant').catch(err => {
+        console.warn('Most relevant reviews fetch failed:', err)
+        return { reviews: [], businessInfo: null }
+      }),
     ])
+
+    // タイムアウトをクリア
+    clearTimeout(timeoutId)
 
     // ビジネス情報を設定（どちらか一方から取得）
     businessInfo.value =
@@ -496,10 +503,13 @@ const fetchAllReviews = async (): Promise<void> => {
       throw new Error('Both API requests failed')
     }
   } catch (err) {
-    const errorMessage =
-      err instanceof Error && err.message.includes('timeout')
-        ? 'リクエストがタイムアウトしました。'
-        : 'API接続に問題があります。'
+    // タイムアウトをクリア
+    clearTimeout(timeoutId)
+
+    const isAborted = abortController.signal.aborted
+    const errorMessage = isAborted
+      ? 'リクエストがタイムアウトしました。'
+      : 'API接続に問題があります。'
 
     console.warn(`${errorMessage} Using mock data:`, err)
     currentReviews.value = mockReviews
